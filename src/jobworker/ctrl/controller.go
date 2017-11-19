@@ -1,9 +1,9 @@
 package ctrl
 
-import "storage"
+import "jobworker/storage"
 
 type Controller struct {
-	Storage *storage.DataStorage,
+	Storage *storage.DataStorage
 }
 
 func NewController(storage *storage.DataStorage) *Controller {

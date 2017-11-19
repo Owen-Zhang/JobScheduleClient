@@ -1,0 +1,13 @@
+storage:
+    hosts: mongodb://10.16.75.22:29017,10.16.75.23:29017,10.16.75.25:29017/cloudtask-test?replicaSet=NeweggCloud
+    dbname: cloudtask-test
+    #auth: 
+        #user: admin
+        #password: 123
+apiserver:
+    bind: :8985
+logger:
+    logfile: ./logs/jobserver.log
+    loglevel: debug
+    logsize: 20971520
+...
