@@ -5,11 +5,11 @@ import "jobworker/storage"
 import "gopkg.in/yaml.v2"
 
 import (
+	"errors"
 	"io/ioutil"
+	"jobworker/api"
 	"os"
 	"utils/system"
-	"errors"
-	"jobworker/api"
 )
 
 type Auth map[string]string
@@ -27,11 +27,11 @@ type Configuration struct {
 
 	//api 和 日志
 	/*
-	Logger struct {
-		LogFile  string `yaml:"logfile,omitempty"`
-		LogLevel string `yaml:"loglevel,omitempty"`
-		LogSize  int64  `yaml:"logsize,omitempty"`
-	} `yaml:"logger,omitempty"`
+		Logger struct {
+			LogFile  string `yaml:"logfile,omitempty"`
+			LogLevel string `yaml:"loglevel,omitempty"`
+			LogSize  int64  `yaml:"logsize,omitempty"`
+		} `yaml:"logger,omitempty"`
 	*/
 }
 
@@ -83,15 +83,15 @@ func makeDefault() *Configuration {
 
 		//日志
 		/*
-		Logger: struct {
-			LogFile  string `yaml:"logfile,omitempty"`
-			LogLevel string `yaml:"loglevel,omitempty"`
-			LogSize  int64  `yaml:"logsize,omitempty"`
-		}{
-			LogFile:  "logs/jobworker.log",
-			LogLevel: "debug",
-			LogSize:  2097152,
-		},
+			Logger: struct {
+				LogFile  string `yaml:"logfile,omitempty"`
+				LogLevel string `yaml:"loglevel,omitempty"`
+				LogSize  int64  `yaml:"logsize,omitempty"`
+			}{
+				LogFile:  "logs/jobworker.log",
+				LogLevel: "debug",
+				LogSize:  2097152,
+			},
 		*/
 	}
 }
@@ -100,7 +100,7 @@ func GetConfiguration() *Configuration {
 	return configuration
 }
 
-func GetStorage() *storage.DataStorageArgs {
+func GetStorageArg() *storage.DataStorageArgs {
 
 	if configuration != nil {
 		return &storage.DataStorageArgs{
@@ -112,8 +112,7 @@ func GetStorage() *storage.DataStorageArgs {
 	return nil
 }
 
-
-func GetApiServer() *api.ApiServerArg {
+func GetApiServerArg() *api.ApiServerArg {
 	if configuration != nil {
 		return &api.ApiServerArg{
 			Bind: configuration.ApiServer.Bind,
