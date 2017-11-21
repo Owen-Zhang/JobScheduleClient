@@ -4,7 +4,10 @@
 *.so
 *.dylib
 pkg
+<<<<<<< HEAD
 bin
+=======
+>>>>>>> cb8a9f8b2b09c9df90b1dddb75059b042e438299
 gopkg.in
 github.com
 

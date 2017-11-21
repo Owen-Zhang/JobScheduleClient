@@ -1,11 +1,11 @@
 package server
 
 import (
-	"jobworker/ctrl"
-	"jobworker/storage"
 	"flag"
-	"jobworker/etc"
 	"jobworker/api"
+	"jobworker/ctrl"
+	"jobworker/etc"
+	"jobworker/storage"
 )
 
 type JobWork struct {
@@ -22,21 +22,22 @@ func NewWorker() (*JobWork, error) {
 	if err := etc.New(etcfile); err != nil {
 		return nil, err
 	}
-	storagearg := etc.GetStorage()
+	storagearg := etc.GetStorageArg()
 	dataaccess, err := storage.NewDataStorage(storagearg)
 	if err != nil {
 		return nil, err
 	}
 
 	controller := ctrl.NewController(dataaccess)
-	apiserver := api.NewAPiServer(etc.GetApiServer(),controller)
+	apiserver := api.NewAPiServer(etc.GetApiServerArg(), controller)
+	apiserver.StartUp()
 
 	job := &JobWork{
 		Controller: controller,
-		Storage   : dataaccess,
-		Api		  : apiserver,
+		Storage:    dataaccess,
+		Api:        apiserver,
 	}
-	return job,nil
+	return job, nil
 }
 
 func (s *JobWork) Start() error {
