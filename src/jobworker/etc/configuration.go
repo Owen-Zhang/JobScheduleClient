@@ -1,15 +1,12 @@
 package etc
 
-//import "api"
 import "jobworker/storage"
 import "gopkg.in/yaml.v2"
 
 import (
-	"errors"
 	"io/ioutil"
 	"jobworker/api"
 	"os"
-	"utils/system"
 )
 
 type Auth map[string]string
@@ -38,9 +35,10 @@ type Configuration struct {
 var configuration *Configuration
 
 func New(file string) error {
+	/*
 	if !system.FileExist(file) {
 		return errors.New("etc -> worker.yml invalid")
-	}
+	}*/
 
 	fp, err := os.OpenFile(file, os.O_RDWR, 0777)
 	if err != nil {

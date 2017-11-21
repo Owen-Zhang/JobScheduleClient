@@ -1,11 +1,11 @@
 package server
 
 import (
-	"flag"
 	"jobworker/api"
 	"jobworker/ctrl"
 	"jobworker/etc"
 	"jobworker/storage"
+	"flag"
 )
 
 type JobWork struct {
@@ -22,6 +22,7 @@ func NewWorker() (*JobWork, error) {
 	if err := etc.New(etcfile); err != nil {
 		return nil, err
 	}
+
 	storagearg := etc.GetStorageArg()
 	dataaccess, err := storage.NewDataStorage(storagearg)
 	if err != nil {
@@ -41,11 +42,10 @@ func NewWorker() (*JobWork, error) {
 }
 
 func (s *JobWork) Start() error {
-	//启动api对外的接口
+	s.Api.StartUp()
 	return nil
 }
 
 func (s *JobWork) Stop() error {
-	//关闭api对外的接口
 	return nil
 }

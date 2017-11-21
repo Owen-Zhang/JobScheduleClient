@@ -3,9 +3,15 @@ package main
 import (
 	"jobworker/server"
 	"os"
+	"utils/system"
 )
 
 func main() {
+	/*
+	defer func() {
+		recover()
+	}()*/
+
 	work, err := server.NewWorker()
 	if err != nil {
 		panic(err)
@@ -22,5 +28,5 @@ func main() {
 		os.Exit(-2)
 	}
 
-	//可以处理一些退出的回调
+	system.InitSignal(nil)
 }
