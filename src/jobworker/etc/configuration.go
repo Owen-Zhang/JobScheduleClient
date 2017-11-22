@@ -35,11 +35,6 @@ type Configuration struct {
 var configuration *Configuration
 
 func New(file string) error {
-	/*
-	if !system.FileExist(file) {
-		return errors.New("etc -> worker.yml invalid")
-	}*/
-
 	fp, err := os.OpenFile(file, os.O_RDWR, 0777)
 	if err != nil {
 		return err
@@ -68,7 +63,7 @@ func makeDefault() *Configuration {
 			DBName string `yaml:"dbname,omitempty"`
 			Auth   Auth   `yaml:"auth,omitempty"`
 		}{
-			Hosts:  "127.0.0.1:4705",
+			Hosts:  "127.0.0.1:27017",
 			DBName: "jobschedule",
 			Auth:   map[string]string{},
 		},
@@ -76,7 +71,7 @@ func makeDefault() *Configuration {
 		ApiServer: struct {
 			Bind string `yaml:"bind,omitempty"`
 		}{
-			Bind: ":8910",
+			Bind: ":8985",
 		},
 
 		//日志

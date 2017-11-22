@@ -1,11 +1,11 @@
 package server
 
 import (
+	"flag"
 	"jobworker/api"
 	"jobworker/ctrl"
 	"jobworker/etc"
 	"jobworker/storage"
-	"flag"
 )
 
 type JobWork struct {
@@ -43,9 +43,12 @@ func NewWorker() (*JobWork, error) {
 
 func (s *JobWork) Start() error {
 	s.Api.StartUp()
+
 	return nil
 }
 
 func (s *JobWork) Stop() error {
+	s.Controller.Close()
+
 	return nil
 }
