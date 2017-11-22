@@ -7,7 +7,6 @@ import "fmt"
 
 //新增任务
 func (this *ApiServer) newtask(c *gin.Context) {
-	fmt.Println("check before")
 	var newRequest model.Task_New
 	if err := c.ShouldBindJSON(&newRequest); err == nil {
 		response := &model.WorkerResponse{
@@ -23,7 +22,7 @@ func (this *ApiServer) newtask(c *gin.Context) {
 			c.JSON(http.StatusBadRequest, response)
 			return
 		}
-		fmt.Println("check after")
+
 		flag := this.controller.NewTask(&newRequest)
 		response.Success = flag
 		c.JSON(http.StatusOK, response)
