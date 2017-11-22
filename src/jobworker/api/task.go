@@ -3,11 +3,10 @@ package api
 import "github.com/gin-gonic/gin"
 import "model"
 import "net/http"
-import "fmt"
 
 //新增任务
 func (this *ApiServer) newtask(c *gin.Context) {
-	var newRequest model.Task_New
+	var newRequest model.TaskNew
 	if err := c.ShouldBindJSON(&newRequest); err == nil {
 		response := &model.WorkerResponse{
 			Success: false,

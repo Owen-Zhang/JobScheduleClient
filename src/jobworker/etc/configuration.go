@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"jobworker/api"
 	"os"
+	"jobworker/jobs"
 )
 
 type Auth map[string]string
@@ -21,6 +22,10 @@ type Configuration struct {
 	ApiServer struct {
 		Bind string `yaml:"bind,omitempty"`
 	} `yaml:"apiserver,omitempty"`
+
+	CronService struct {
+		PoolSize int32 `yaml:"poolsize,omitempty"`
+	} `yaml:"cron,omitempty"`
 
 	//api 和 日志
 	/*
@@ -74,6 +79,12 @@ func makeDefault() *Configuration {
 			Bind: ":8985",
 		},
 
+		CronService: struct {
+			PoolSize int32 `yaml:"poolsize,omitempty"`
+		}{
+			PoolSize: 10,
+		},
+
 		//日志
 		/*
 			Logger: struct {
@@ -109,6 +120,15 @@ func GetApiServerArg() *api.ApiServerArg {
 	if configuration != nil {
 		return &api.ApiServerArg{
 			Bind: configuration.ApiServer.Bind,
+		}
+	}
+	return nil
+}
+
+func GetCronArg() *jobs.CronArg {
+	if configuration != nil {
+		return &jobs.CronArg{
+			PoolSize: configuration.CronService.PoolSize,
 		}
 	}
 	return nil

@@ -29,7 +29,8 @@ func NewWorker() (*JobWork, error) {
 		return nil, err
 	}
 
-	controller := ctrl.NewController(dataaccess)
+	cronarg := etc.GetCronArg()
+	controller := ctrl.NewController(dataaccess, cronarg)
 	apiserver := api.NewAPiServer(etc.GetApiServerArg(), controller)
 	apiserver.StartUp()
 

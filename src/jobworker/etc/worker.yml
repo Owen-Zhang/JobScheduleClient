@@ -6,4 +6,7 @@ storage:
         #password: 123
 apiserver:
     bind: :8985
+cron:
+  poolsize: 10
+
 ...
