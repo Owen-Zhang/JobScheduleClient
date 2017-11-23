@@ -6,6 +6,7 @@ import (
 	"jobworker/ctrl"
 	"jobworker/etc"
 	"jobworker/storage"
+	"jobworker/jobs"
 )
 
 type JobWork struct {
@@ -28,9 +29,9 @@ func NewWorker() (*JobWork, error) {
 	if err != nil {
 		return nil, err
 	}
+	controller := ctrl.NewController(dataaccess)
 
-	cronarg := etc.GetCronArg()
-	controller := ctrl.NewController(dataaccess, cronarg)
+	jobs.NewCron(etc.GetCronArg(), controller)
 	apiserver := api.NewAPiServer(etc.GetApiServerArg(), controller)
 
 	job := &JobWork{

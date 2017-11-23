@@ -17,7 +17,7 @@ const (
 type Controller struct {
 	Ticker      *time.Ticker
 	actionlist  chan action
-	cronservice *jobs.CronService
+	//cronservice *jobs.CronService
 	Storage     *storage.DataStorage
 }
 
@@ -27,14 +27,11 @@ type action struct {
 	zipFileUrl string //zip文件的下载地址
 }
 
-func NewController(storage *storage.DataStorage, cronarg *jobs.CronArg) *Controller {
+func NewController(storage *storage.DataStorage) *Controller {
 	list := make(chan action, 10)
-	cronservice := jobs.NewCron(cronarg)
-
 	return &Controller{
 		Storage:     storage,
 		actionlist:  list,
-		cronservice: cronservice,
 	}
 }
 

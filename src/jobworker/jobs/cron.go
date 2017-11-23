@@ -2,30 +2,54 @@ package jobs
 
 import (
 	"github.com/robfig/cron"
+	"sync"
+	"jobworker/ctrl"
 )
 
 type CronArg struct {
 	PoolSize int32
 }
 
-type CronService struct {
-	mainCron *cron.Cron
-	workPool chan bool
-}
+var (
+	workPool 	chan bool
+	mainCron 	*cron.Cron
+	controller  *ctrl.Controller
+	)
 
-func NewCron(arg *CronArg) * CronService {
-	var workPoll chan bool
+func NewCron(arg *CronArg, contr *ctrl.Controller) {
 	if arg.PoolSize > 0 {
-		workPoll = make(chan bool, arg.PoolSize)
+		workPool = make(chan bool, arg.PoolSize)
 	}
 
+	controller = contr
 	mainCron := cron.New()
 	mainCron.Start()
-
-	result := &CronService{
-		mainCron :mainCron,
-		workPool :workPoll,
-	}
-	return result
 }
 
+func AddJob(spec string, job *Job) bool {
+	lock := sync.Mutex{}
+
+	lock.Lock()
+	defer lock.Unlock()
+
+	if GetEntryById(job.id) == nil {
+		return false
+	}
+
+	if err := mainCron.AddJob(spec, job); err == nil {
+		return true
+	}
+	return false
+}
+
+func GetEntryById(id string) *cron.Entry {
+	entries :=  mainCron.Entries()
+	for _, e := range entries{
+		if v, flag := e.Job.(*Job); flag {
+			if v.id == id {
+				return e
+			}
+		}
+	}
+	return nil
+}

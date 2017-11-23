@@ -1,12 +1,11 @@
 storage:
     hosts: mongodb://127.0.0.1:27017
     dbname: jobschedule
-    #auth: 
+    #auth:
         #user: admin
         #password: 123
 apiserver:
     bind: :8985
 cron:
   poolsize: 10
-
 ...
