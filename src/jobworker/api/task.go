@@ -22,7 +22,7 @@ func (this *ApiServer) newtask(c *gin.Context) {
 			return
 		}
 
-		flag := this.controller.NewTask(&newRequest)
+		flag := this.controller.New(&newRequest)
 		response.Success = flag
 		c.JSON(http.StatusOK, response)
 
@@ -36,21 +36,47 @@ func (this *ApiServer) newtask(c *gin.Context) {
 
 //运行任务
 func (this *ApiServer) starttask(c *gin.Context) {
-	c.JSON(200, gin.H{
-		"message": "OK",
-	})
+	var newRequest model.TaskNew
+	if err := c.ShouldBindJSON(&newRequest); err == nil {
+		response := &model.WorkerResponse{
+			Success: false,
+			Message: "",
+		}
+		if newRequest.Id == "" {
+			response.Message = "task id is empty"
+			c.JSON(http.StatusBadRequest, response)
+			return
+		}
+		flag := this.controller.Start(&newRequest)
+		response.Success = flag
+		c.JSON(http.StatusOK, response)
+
+	} else {
+		c.JSON(http.StatusBadRequest, &model.WorkerResponse{
+			Success: false,
+			Message: err.Error(),
+		})
+	}
 }
 
 //停止任务
 func (this *ApiServer) stoptask(c *gin.Context) {
-	c.JSON(200, gin.H{
-		"message": "OK",
+	id := c.Param("id")
+
+	flag := this.controller.Stop(id)
+	c.JSON(http.StatusOK, &model.WorkerResponse{
+		Success: flag,
+		Message: "",
 	})
 }
 
 //删除任务
 func (this *ApiServer) deletetask(c *gin.Context) {
-	c.JSON(200, gin.H{
-		"message": "OK",
+	id := c.Param("id")
+
+	flag := this.controller.Delete(id)
+	c.JSON(http.StatusOK, &model.WorkerResponse{
+		Success: flag,
+		Message: "",
 	})
 }

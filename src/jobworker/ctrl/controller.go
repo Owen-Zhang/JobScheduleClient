@@ -1,8 +1,10 @@
 package ctrl
 
 import (
-	"jobworker/storage"
+	"fmt"
 	"jobworker/jobs"
+	"jobworker/storage"
+	"time"
 )
 
 const (
@@ -13,9 +15,10 @@ const (
 )
 
 type Controller struct {
-	actionlist 	chan action
+	Ticker      *time.Ticker
+	actionlist  chan action
 	cronservice *jobs.CronService
-	Storage    	*storage.DataStorage
+	Storage     *storage.DataStorage
 }
 
 type action struct {
@@ -29,9 +32,22 @@ func NewController(storage *storage.DataStorage, cronarg *jobs.CronArg) *Control
 	cronservice := jobs.NewCron(cronarg)
 
 	return &Controller{
-		Storage:    storage,
-		actionlist: list,
-		cronservice:cronservice,
+		Storage:     storage,
+		actionlist:  list,
+		cronservice: cronservice,
+	}
+}
+
+func (this *Controller) ListenTask() {
+NEW_TICK_DURATION:
+	this.Ticker = time.NewTicker(time.Second * 1)
+	for {
+		select {
+		case newtask := <-this.actionlist:
+			fmt.Println(newtask.id)
+			this.Ticker.Stop()
+			goto NEW_TICK_DURATION
+		}
 	}
 }
 

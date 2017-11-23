@@ -14,8 +14,8 @@ func (this *ApiServer) InitRoute() {
 	worker.POST("/starttask", this.starttask)
 
 	//停止任务
-	worker.POST("stoptask", this.stoptask)
+	worker.POST("stoptask/:id", this.stoptask)
 
 	//删除任务
-	worker.POST("deletetask", this.deletetask)
+	worker.POST("deletetask/:id", this.deletetask)
 }

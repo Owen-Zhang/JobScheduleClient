@@ -32,7 +32,6 @@ func NewWorker() (*JobWork, error) {
 	cronarg := etc.GetCronArg()
 	controller := ctrl.NewController(dataaccess, cronarg)
 	apiserver := api.NewAPiServer(etc.GetApiServerArg(), controller)
-	apiserver.StartUp()
 
 	job := &JobWork{
 		Controller: controller,
@@ -43,6 +42,7 @@ func NewWorker() (*JobWork, error) {
 }
 
 func (s *JobWork) Start() error {
+	go s.Controller.ListenTask()
 	s.Api.StartUp()
 
 	return nil
