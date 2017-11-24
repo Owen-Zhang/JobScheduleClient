@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"jobworker/jobs"
 	"jobworker/storage"
+	"model"
 	"time"
 )
 
@@ -15,10 +16,9 @@ const (
 )
 
 type Controller struct {
-	Ticker      *time.Ticker
-	actionlist  chan action
-	//cronservice *jobs.CronService
-	Storage     *storage.DataStorage
+	Ticker     *time.Ticker
+	actionlist chan action
+	Storage    *storage.DataStorage
 }
 
 type action struct {
@@ -30,8 +30,8 @@ type action struct {
 func NewController(storage *storage.DataStorage) *Controller {
 	list := make(chan action, 10)
 	return &Controller{
-		Storage:     storage,
-		actionlist:  list,
+		Storage:    storage,
+		actionlist: list,
 	}
 }
 
@@ -41,7 +41,13 @@ NEW_TICK_DURATION:
 	for {
 		select {
 		case newtask := <-this.actionlist:
-			fmt.Println(newtask.id)
+			fmt.Printf("ListenTask task id is : %s \n", newtask.id)
+			jobs.AddJob(&model.Task{
+				Id:       "123456789-qwert",
+				Name:     "testJob",
+				CronSpec: "0 */1 * * * ?",
+				Command:  "echo first",
+			})
 			this.Ticker.Stop()
 			goto NEW_TICK_DURATION
 		}

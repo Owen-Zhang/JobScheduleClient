@@ -1,19 +1,54 @@
 package jobs
 
 import (
-	"time"
-	"model"
+	"bytes"
 	"fmt"
+	"model"
+	"os/exec"
+	"time"
+
+	"github.com/axgle/mahonia"
 )
 
 type Job struct {
-	id         string                                            // 任务ID
-	//logId      int64                                             // 日志记录ID
+	id string // 任务ID
+	//logId      int64                                           // 日志记录ID
 	name       string                                            // 任务名称
 	task       *model.Task                                       // 任务对象
 	runFunc    func(time.Duration) (string, string, error, bool) // 执行函数
 	status     int                                               // 任务状态，大于0表示正在执行中
 	concurrent bool                                              // 同一个任务是否允许并行执行
+}
+
+//通过任务去创建cron job(此处要区分运行文件(要指定路径)和一些指令)
+func newJobFromTask(task *model.Task) (*Job, error) {
+	job := newCommandJob(task.Id, task.Name, task.Command)
+	job.task = task
+	job.concurrent = task.Concurrent == 1
+
+	return job, nil
+}
+
+func newCommandJob(id string, name string, command string) *Job {
+	job := &Job{
+		id:   id,
+		name: name,
+	}
+	job.runFunc = func(timeout time.Duration) (string, string, error, bool) {
+		bufOut := new(bytes.Buffer)
+		bufErr := new(bytes.Buffer)
+
+		cmd := exec.Command("cmd.exe", "/c", command)
+		cmd.Stdout = bufOut
+		cmd.Stderr = bufErr
+		cmd.Start() //另外开一个cmd程序去运行任务
+
+		err, isTimeout := runCmdWithTimeOut(cmd, timeout)
+		encoder := mahonia.NewDecoder("gbk")
+
+		return encoder.ConvertString(bufOut.String()), encoder.ConvertString(bufErr.String()), err, isTimeout
+	}
+	return job
 }
 
 func (this *Job) Run() {
@@ -24,7 +59,7 @@ func (this *Job) Run() {
 	defer func() {
 		if err := recover(); err != nil {
 			//此处最好写日志
-			fmt.Printf("Run wrong is : %s", err)
+			fmt.Printf("Run wrong is : %s\n", err)
 		}
 	}()
 
@@ -32,7 +67,7 @@ func (this *Job) Run() {
 	if workPool != nil {
 		workPool <- true
 		defer func() {
-			<- workPool
+			<-workPool
 		}()
 	}
 
@@ -49,10 +84,41 @@ func (this *Job) Run() {
 	if this.task.TimeOut > 0 {
 		timeout = time.Second * time.Duration(this.task.TimeOut)
 	}
+
+	fmt.Printf("timeout is %d\n", timeout)
+
 	cmdOut, cmdErr, err, isTimeout := this.runFunc(timeout)
 	ut := time.Now().Sub(t) / time.Millisecond
+
+	fmt.Printf("cmdOut:%s; cmdErr: %s; err:%s; isTimeout: %d; \n", cmdOut, cmdErr, err.Error(), isTimeout)
+	fmt.Println(ut)
 
 	//写日志
 	//发邮件
 	//更新任务执行时间等
+}
+
+func runCmdWithTimeOut(cmd *exec.Cmd, timeout time.Duration) (error, bool) {
+	fmt.Printf("\n cmd: %t; timeout: %d \n", cmd == nil, timeout)
+	done := make(chan error)
+	go func() {
+		done <- cmd.Wait()
+	}()
+
+	var err error
+	select {
+	case <-time.After(timeout):
+		//超时，记日志等
+		fmt.Printf("任务执行时间超过%d秒，进程将被强制杀掉: %d", int(timeout/time.Second), cmd.Process.Pid)
+		go func() {
+			<-done
+		}()
+		if err = cmd.Process.Kill(); err != nil {
+			fmt.Printf("进程无法杀掉: %d, 错误信息: %s", cmd.Process.Pid, err.Error())
+		}
+		return err, true
+
+	case err = <-done:
+		return err, false
+	}
 }

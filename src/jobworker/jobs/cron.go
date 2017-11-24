@@ -1,9 +1,12 @@
 package jobs
 
 import (
-	"github.com/robfig/cron"
+	"fmt"
+	"jobworker/storage"
+	"model"
 	"sync"
-	"jobworker/ctrl"
+
+	"github.com/robfig/cron"
 )
 
 type CronArg struct {
@@ -11,40 +14,46 @@ type CronArg struct {
 }
 
 var (
-	workPool 	chan bool
-	mainCron 	*cron.Cron
-	controller  *ctrl.Controller
-	)
+	workPool chan bool
+	mainCron *cron.Cron
+	data     *storage.DataStorage
+)
 
-func NewCron(arg *CronArg, contr *ctrl.Controller) {
+func NewCron(arg *CronArg, storage *storage.DataStorage) {
 	if arg.PoolSize > 0 {
 		workPool = make(chan bool, arg.PoolSize)
 	}
 
-	controller = contr
-	mainCron := cron.New()
+	data = storage
+	mainCron = cron.New()
 	mainCron.Start()
+	fmt.Println("cron started")
 }
 
-func AddJob(spec string, job *Job) bool {
-	lock := sync.Mutex{}
-
-	lock.Lock()
-	defer lock.Unlock()
-
-	if GetEntryById(job.id) == nil {
+//增加任务
+func AddJob(task *model.Task) bool {
+	job, err := newJobFromTask(task)
+	if err != nil {
 		return false
 	}
 
-	if err := mainCron.AddJob(spec, job); err == nil {
+	lock := sync.Mutex{}
+	lock.Lock()
+	defer lock.Unlock()
+
+	if getEntryById(job.id) != nil {
+		return false
+	}
+
+	if err := mainCron.AddJob(task.CronSpec, job); err == nil {
 		return true
 	}
 	return false
 }
 
-func GetEntryById(id string) *cron.Entry {
-	entries :=  mainCron.Entries()
-	for _, e := range entries{
+func getEntryById(id string) *cron.Entry {
+	entries := mainCron.Entries()
+	for _, e := range entries {
 		if v, flag := e.Job.(*Job); flag {
 			if v.id == id {
 				return e

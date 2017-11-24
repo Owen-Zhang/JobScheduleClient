@@ -5,8 +5,8 @@ import (
 	"jobworker/api"
 	"jobworker/ctrl"
 	"jobworker/etc"
-	"jobworker/storage"
 	"jobworker/jobs"
+	"jobworker/storage"
 )
 
 type JobWork struct {
@@ -30,9 +30,8 @@ func NewWorker() (*JobWork, error) {
 		return nil, err
 	}
 	controller := ctrl.NewController(dataaccess)
-
-	jobs.NewCron(etc.GetCronArg(), controller)
 	apiserver := api.NewAPiServer(etc.GetApiServerArg(), controller)
+	jobs.NewCron(etc.GetCronArg(), dataaccess)
 
 	job := &JobWork{
 		Controller: controller,
