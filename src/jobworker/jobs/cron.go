@@ -1,7 +1,6 @@
 package jobs
 
 import (
-	"fmt"
 	"jobworker/storage"
 	"model"
 	"sync"
@@ -27,7 +26,6 @@ func NewCron(arg *CronArg, storage *storage.DataStorage) {
 	data = storage
 	mainCron = cron.New()
 	mainCron.Start()
-	fmt.Println("cron started")
 }
 
 //增加任务
@@ -49,6 +47,18 @@ func AddJob(task *model.Task) bool {
 		return true
 	}
 	return false
+}
+
+//删除运行中的任务
+func RemoveJob(id string) {
+	mainCron.RemoveJob(func(e *cron.Entry) bool {
+		if v, flag := e.Job.(*Job); flag {
+			if v.id == id {
+				return true
+			}
+		}
+		return false
+	})
 }
 
 func getEntryById(id string) *cron.Entry {

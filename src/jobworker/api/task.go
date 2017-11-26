@@ -1,8 +1,11 @@
 package api
 
-import "github.com/gin-gonic/gin"
-import "model"
-import "net/http"
+import (
+	"net/http"
+	"jobworker/ctrl"
+	"model"
+	"github.com/gin-gonic/gin"
+)
 
 //新增任务
 func (this *ApiServer) newtask(c *gin.Context) {
@@ -22,8 +25,13 @@ func (this *ApiServer) newtask(c *gin.Context) {
 			return
 		}
 
-		flag := this.controller.New(&newRequest)
-		response.Success = flag
+		this.controller.Actionlist <- ctrl.Action{
+			ActionType: 1,
+			Id:         newRequest.Id,
+			ZipFileUrl: newRequest.ZipFileUrl,
+		}
+
+		response.Success = true
 		c.JSON(http.StatusOK, response)
 
 	} else {
@@ -47,8 +55,14 @@ func (this *ApiServer) starttask(c *gin.Context) {
 			c.JSON(http.StatusBadRequest, response)
 			return
 		}
-		flag := this.controller.Start(&newRequest)
-		response.Success = flag
+
+		this.controller.Actionlist <- ctrl.Action{
+			ActionType: 2,
+			Id:         newRequest.Id,
+			ZipFileUrl: newRequest.ZipFileUrl,
+		}
+
+		response.Success = true
 		c.JSON(http.StatusOK, response)
 
 	} else {
@@ -63,9 +77,13 @@ func (this *ApiServer) starttask(c *gin.Context) {
 func (this *ApiServer) stoptask(c *gin.Context) {
 	id := c.Param("id")
 
-	flag := this.controller.Stop(id)
+	this.controller.Actionlist <- ctrl.Action{
+		ActionType: 3,
+		Id:         id,
+	}
+
 	c.JSON(http.StatusOK, &model.WorkerResponse{
-		Success: flag,
+		Success: true,
 		Message: "",
 	})
 }
@@ -74,9 +92,13 @@ func (this *ApiServer) stoptask(c *gin.Context) {
 func (this *ApiServer) deletetask(c *gin.Context) {
 	id := c.Param("id")
 
-	flag := this.controller.Delete(id)
+	this.controller.Actionlist <- ctrl.Action{
+		ActionType: 4,
+		Id:         id,
+	}
+
 	c.JSON(http.StatusOK, &model.WorkerResponse{
-		Success: flag,
+		Success: true,
 		Message: "",
 	})
 }

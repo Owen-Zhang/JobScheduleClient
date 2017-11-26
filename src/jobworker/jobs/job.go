@@ -85,12 +85,9 @@ func (this *Job) Run() {
 		timeout = time.Second * time.Duration(this.task.TimeOut)
 	}
 
-	fmt.Printf("timeout is %d\n", timeout)
-
 	cmdOut, cmdErr, err, isTimeout := this.runFunc(timeout)
 	ut := time.Now().Sub(t) / time.Millisecond
-
-	fmt.Printf("cmdOut:%s; cmdErr: %s; err:%s; isTimeout: %d; \n", cmdOut, cmdErr, err.Error(), isTimeout)
+	fmt.Printf("cmdOut:%s; cmdErr: %s; err:%s; isTimeout: %t; \n", cmdOut, cmdErr, err, isTimeout)
 	fmt.Println(ut)
 
 	//写日志
@@ -99,7 +96,6 @@ func (this *Job) Run() {
 }
 
 func runCmdWithTimeOut(cmd *exec.Cmd, timeout time.Duration) (error, bool) {
-	fmt.Printf("\n cmd: %t; timeout: %d \n", cmd == nil, timeout)
 	done := make(chan error)
 	go func() {
 		done <- cmd.Wait()
@@ -114,11 +110,12 @@ func runCmdWithTimeOut(cmd *exec.Cmd, timeout time.Duration) (error, bool) {
 			<-done
 		}()
 		if err = cmd.Process.Kill(); err != nil {
-			fmt.Printf("进程无法杀掉: %d, 错误信息: %s", cmd.Process.Pid, err.Error())
+			fmt.Printf("进程无法杀掉: %d, 错误信息: %s", cmd.Process.Pid, err)
 		}
 		return err, true
 
 	case err = <-done:
+		fmt.Printf("err is %s", err)
 		return err, false
 	}
 }

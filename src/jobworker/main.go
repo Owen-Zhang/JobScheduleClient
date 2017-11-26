@@ -7,10 +7,10 @@ import (
 )
 
 func main() {
-	/*
+
 	defer func() {
 		recover()
-	}()*/
+	}()
 
 	work, err := server.NewWorker()
 	if err != nil {
