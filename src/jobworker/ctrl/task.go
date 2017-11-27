@@ -1,8 +1,8 @@
 package ctrl
 
 import (
-	"model"
 	"jobworker/jobs"
+	"model"
 )
 
 //运行任务(包括新增和重新启动)
@@ -21,10 +21,14 @@ func (this *Controller) start(request *Action) {
 
 //停止任务
 func (this *Controller) stop(id string) {
-
+	//1: 查询数据，看是否存在此任务
+	//2: 终止任务运行
+	//3: 更改数据库的状态信息
 }
 
 //删除任务
 func (this *Controller) delete(id string) {
-
+	//1: 查询数据，看是否存在此任务
+	//2: 终止任务运行
+	//3: 删除数据库的任务
 }

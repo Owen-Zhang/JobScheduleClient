@@ -10,13 +10,13 @@ import (
 	"jobworker/jobs"
 )
 
-type Auth map[string]string
-
 type Configuration struct {
 	Storage struct {
 		Hosts  string `yaml:"hosts,omitempty"`
 		DBName string `yaml:"dbname,omitempty"`
-		Auth   Auth   `yaml:"auth,omitempty"`
+		User   string   `yaml:"user,omitempty"`
+		Password string  `yaml:"password,omitempty"` 
+		Port int32  `yaml:"port,omitempty"`
 	} `yaml:"storage,omitempty"`
 
 	ApiServer struct {
@@ -26,15 +26,6 @@ type Configuration struct {
 	CronService struct {
 		PoolSize int32 `yaml:"poolsize,omitempty"`
 	} `yaml:"cron,omitempty"`
-
-	//api 和 日志
-	/*
-		Logger struct {
-			LogFile  string `yaml:"logfile,omitempty"`
-			LogLevel string `yaml:"loglevel,omitempty"`
-			LogSize  int64  `yaml:"logsize,omitempty"`
-		} `yaml:"logger,omitempty"`
-	*/
 }
 
 var configuration *Configuration
@@ -66,11 +57,15 @@ func makeDefault() *Configuration {
 		Storage: struct {
 			Hosts  string `yaml:"hosts,omitempty"`
 			DBName string `yaml:"dbname,omitempty"`
-			Auth   Auth   `yaml:"auth,omitempty"`
+			User   string   `yaml:"user,omitempty"`
+			Password string  `yaml:"password,omitempty"` 
+			Port int32  `yaml:"port,omitempty"`
 		}{
 			Hosts:  "127.0.0.1:27017",
 			DBName: "jobschedule",
-			Auth:   map[string]string{},
+			User:   "guest",
+			Password: "123456", 
+			Port: 3306,
 		},
 
 		ApiServer: struct {
@@ -84,19 +79,6 @@ func makeDefault() *Configuration {
 		}{
 			PoolSize: 10,
 		},
-
-		//日志
-		/*
-			Logger: struct {
-				LogFile  string `yaml:"logfile,omitempty"`
-				LogLevel string `yaml:"loglevel,omitempty"`
-				LogSize  int64  `yaml:"logsize,omitempty"`
-			}{
-				LogFile:  "logs/jobworker.log",
-				LogLevel: "debug",
-				LogSize:  2097152,
-			},
-		*/
 	}
 }
 
@@ -110,7 +92,9 @@ func GetStorageArg() *storage.DataStorageArgs {
 		return &storage.DataStorageArgs{
 			Hosts:  configuration.Storage.Hosts,
 			DBName: configuration.Storage.DBName,
-			Auth:   configuration.Storage.Auth,
+			User:   configuration.Storage.User,
+			Password: configuration.Storage.Password,
+			Port:  configuration.Storage.Port,
 		}
 	}
 	return nil

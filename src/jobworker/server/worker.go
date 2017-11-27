@@ -49,7 +49,9 @@ func (s *JobWork) Start() error {
 }
 
 func (s *JobWork) Stop() error {
-	s.Controller.Close()
-
+	defer func() {
+		s.Storage.Close()
+		s.Controller.Close()
+	}()
 	return nil
 }
