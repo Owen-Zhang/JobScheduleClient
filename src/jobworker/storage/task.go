@@ -9,3 +9,14 @@ func (this *DataStorage) GetTaskById(id string) {
 		fmt.Println(err)
 	}
 }
+
+//更新任务的相关信息
+func (this *DataStorage) UpdateTask () {
+	
+}
+
+//增加日志信息
+func (this *DataStorage) AddTaskLog() {
+	
+}
+

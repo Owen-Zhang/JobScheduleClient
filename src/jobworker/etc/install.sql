@@ -6,7 +6,7 @@ CREATE TABLE `task` (
   `task_type` tinyint(4) NOT NULL DEFAULT '0' COMMENT '任务类型',
   `description` varchar(200) NOT NULL DEFAULT '' COMMENT '任务描述',
   `cron_spec` varchar(100) NOT NULL DEFAULT '' COMMENT '时间表达式',
-  `run_file_folder` varchar(200) NOT NULL DEFAULT '' COMMENT '运行程序的路径信息',
+  `run_file_folder` varchar(200) NOT NULL DEFAULT '' COMMENT '运行程序的文件夹信息',
   `old_zip_file` varchar(200) NOT NULL DEFAULT '' COMMENT '当前运行程序的上传zip包名称',
   `concurrent` tinyint(4) NOT NULL DEFAULT '0' COMMENT '是否只允许一个实例',
   `command` text NOT NULL COMMENT '命令详情',
