@@ -61,7 +61,7 @@ func makeDefault() *Configuration {
 			Password string  `yaml:"password,omitempty"` 
 			Port int32  `yaml:"port,omitempty"`
 		}{
-			Hosts:  "127.0.0.1:27017",
+			Hosts:  "127.0.0.1",
 			DBName: "jobschedule",
 			User:   "guest",
 			Password: "123456", 
@@ -117,18 +117,3 @@ func GetCronArg() *jobs.CronArg {
 	}
 	return nil
 }
-
-//日志
-/*
-func GetLogger() *logger.Args {
-
-	if configuration != nil {
-		return &logger.Args{
-			FileName: configuration.Logger.LogFile,
-			Level:    configuration.Logger.LogLevel,
-			MaxSize:  configuration.Logger.LogSize,
-		}
-	}
-	return nil
-}
-*/

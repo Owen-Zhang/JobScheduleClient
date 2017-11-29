@@ -11,7 +11,7 @@ import (
 )
 
 type Job struct {
-	id string // 任务ID
+	id int // 任务ID
 	//logId      int64                                           // 日志记录ID
 	name       string                                            // 任务名称
 	task       *model.Task                                       // 任务对象
@@ -29,7 +29,7 @@ func newJobFromTask(task *model.Task) (*Job, error) {
 	return job, nil
 }
 
-func newCommandJob(id string, name string, command string) *Job {
+func newCommandJob(id int, name string, command string) *Job {
 	job := &Job{
 		id:   id,
 		name: name,

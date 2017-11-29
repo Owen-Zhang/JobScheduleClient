@@ -5,6 +5,7 @@ import (
 	"jobworker/ctrl"
 	"model"
 	"github.com/gin-gonic/gin"
+	"strconv"
 )
 
 //新增任务
@@ -15,7 +16,7 @@ func (this *ApiServer) newtask(c *gin.Context) {
 			Success: false,
 			Message: "",
 		}
-		if newRequest.Id == "" {
+		if newRequest.Id == 0 {
 			response.Message = "task id is empty"
 			c.JSON(http.StatusBadRequest, response)
 			return
@@ -50,7 +51,7 @@ func (this *ApiServer) starttask(c *gin.Context) {
 			Success: false,
 			Message: "",
 		}
-		if newRequest.Id == "" {
+		if newRequest.Id == 0 {
 			response.Message = "task id is empty"
 			c.JSON(http.StatusBadRequest, response)
 			return
@@ -75,7 +76,14 @@ func (this *ApiServer) starttask(c *gin.Context) {
 
 //停止任务
 func (this *ApiServer) stoptask(c *gin.Context) {
-	id := c.Param("id")
+	idtemp := c.Param("id")
+	id, err :=strconv.Atoi(idtemp)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, &model.WorkerResponse{
+			Success: false,
+			Message: "请传入正常的任务信息",
+		})
+	}
 
 	this.controller.Actionlist <- ctrl.Action{
 		ActionType: 3,
@@ -90,7 +98,14 @@ func (this *ApiServer) stoptask(c *gin.Context) {
 
 //删除任务
 func (this *ApiServer) deletetask(c *gin.Context) {
-	id := c.Param("id")
+	idtemp := c.Param("id")
+	id, err :=strconv.Atoi(idtemp)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, &model.WorkerResponse{
+			Success: false,
+			Message: "请传入正常的任务信息",
+		})
+	}
 
 	this.controller.Actionlist <- ctrl.Action{
 		ActionType: 4,

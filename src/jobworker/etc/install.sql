@@ -34,7 +34,7 @@ CREATE TABLE `task_group` (
   KEY `idx_user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE task_log` (
+CREATE TABLE `task_log` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `task_id` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '任务ID',
   `output` mediumtext NOT NULL COMMENT '任务输出',

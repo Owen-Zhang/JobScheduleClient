@@ -22,6 +22,8 @@ type DataStorage struct {
 //要加上最大连接数
 func NewDataStorage(arg *DataStorageArgs) (*DataStorage, error) {
 	constr := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8", arg.User, arg.Password, arg.Hosts, arg.Port, arg.DBName)
+	fmt.Printf("连接字符串为：%s", constr)
+
 	dbtemp,err := sql.Open("mysql", constr)
 	if err != nil {
 		fmt.Printf("数据库连接出错了：%s", err)

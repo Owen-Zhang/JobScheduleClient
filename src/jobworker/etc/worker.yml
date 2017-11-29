@@ -1,9 +1,9 @@
 storage:
     hosts: 127.0.0.1
     dbname: jobscheduletask
-    user: guest
+    user: root
     password: 123456
-	port:3306
+    port: 3306
 apiserver:
     bind: :8985
 cron:

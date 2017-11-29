@@ -7,6 +7,7 @@ import (
 	"jobworker/etc"
 	"jobworker/jobs"
 	"jobworker/storage"
+	"fmt"
 )
 
 type JobWork struct {
@@ -25,6 +26,9 @@ func NewWorker() (*JobWork, error) {
 	}
 
 	storagearg := etc.GetStorageArg()
+
+	fmt.Printf("Hosts:%s; DBName:%s; Password:%s; User:%s; Port:%d",storagearg.Hosts, storagearg.DBName, storagearg.Password, storagearg.User, storagearg.Port)
+
 	dataaccess, err := storage.NewDataStorage(storagearg)
 	if err != nil {
 		return nil, err

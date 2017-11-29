@@ -13,7 +13,7 @@ type Controller struct {
 
 type Action struct {
 	ActionType int    //操作类型
-	Id         string //任务的主键
+	Id         int //任务的主键
 	ZipFileUrl string //zip文件的下载地址
 }
 

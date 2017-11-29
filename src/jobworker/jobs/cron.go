@@ -50,7 +50,7 @@ func AddJob(task *model.Task) bool {
 }
 
 //删除运行中的任务
-func RemoveJob(id string) {
+func RemoveJob(id int) {
 	mainCron.RemoveJob(func(e *cron.Entry) bool {
 		if v, flag := e.Job.(*Job); flag {
 			if v.id == id {
@@ -61,7 +61,7 @@ func RemoveJob(id string) {
 	})
 }
 
-func getEntryById(id string) *cron.Entry {
+func getEntryById(id int) *cron.Entry {
 	entries := mainCron.Entries()
 	for _, e := range entries {
 		if v, flag := e.Job.(*Job); flag {
