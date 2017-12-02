@@ -16,8 +16,6 @@ func (this *DataStorage) GetTaskById(idinput int) *model.Task {
 	var notify, concurrent int8
 	err := row.Scan(&id, &task_name, &cron_spec, &run_file_folder, &old_zip_file, &concurrent, &command, &notify, &notify_email, &timeout, &version)
 
-	fmt.Printf("data access QueryRow err is : %s", err)
-
 	if err != nil {
 		fmt.Println(err)
 		return  nil
