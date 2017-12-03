@@ -11,8 +11,7 @@ import (
 )
 
 type Job struct {
-	id int // 任务ID
-	//logId      int64                                           // 日志记录ID
+	id 		   int                                               // 任务ID
 	name       string                                            // 任务名称
 	task       *model.Task                                       // 任务对象
 	runFunc    func(time.Duration) (string, string, error, bool) // 执行函数

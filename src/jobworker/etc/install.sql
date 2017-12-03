@@ -18,6 +18,7 @@ CREATE TABLE `task` (
   `prev_time` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '上次执行时间',
   `create_time` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '创建时间',
   `version` int(11) unsigned NOT NULL DEFAULT 0 COMMENT '版本号',
+  `zip_file_path` VARCHAR(300) NOT NULL DEFAULT '' COMMENT 'zip获取地址',
   PRIMARY KEY (`id`),
   KEY `idx_user_id` (`user_id`),
   KEY `idx_group_id` (`group_id`)
