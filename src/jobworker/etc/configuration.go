@@ -8,6 +8,7 @@ import (
 	"jobworker/api"
 	"os"
 	"jobworker/jobs"
+	"jobworker/ctrl"
 )
 
 type Configuration struct {
@@ -26,6 +27,12 @@ type Configuration struct {
 	CronService struct {
 		PoolSize int32 `yaml:"poolsize,omitempty"`
 	} `yaml:"cron,omitempty"`
+
+	ExeConfig struct {
+		ClientPath string `yaml:"clientpath,omitempty"`
+		TempZipFolder string `yaml:"tempzipfolder,omitempty"`
+		TaskFolder string `yaml:"taskfolder,omitempty"`
+	} `yaml:"exeinfo,omitempty"`
 }
 
 var configuration *Configuration
@@ -79,13 +86,20 @@ func makeDefault() *Configuration {
 		}{
 			PoolSize: 10,
 		},
+
+		ExeConfig : struct {
+			ClientPath string `yaml:"clientpath,omitempty"`
+			TempZipFolder string `yaml:"tempzipfolder,omitempty"`
+			TaskFolder string `yaml:"taskfolder,omitempty"`
+		}{
+			ClientPath: "D:\\code\\JobScheduleClient\\bin",
+			TempZipFolder: "TempFile",
+			TaskFolder: "Data",
+		},
 	}
 }
 
-func GetConfiguration() *Configuration {
-	return configuration
-}
-
+//数据访问的相关配制
 func GetStorageArg() *storage.DataStorageArgs {
 
 	if configuration != nil {
@@ -100,6 +114,7 @@ func GetStorageArg() *storage.DataStorageArgs {
 	return nil
 }
 
+//对外api的相关配制
 func GetApiServerArg() *api.ApiServerArg {
 	if configuration != nil {
 		return &api.ApiServerArg{
@@ -109,10 +124,23 @@ func GetApiServerArg() *api.ApiServerArg {
 	return nil
 }
 
+//cron的相关配制
 func GetCronArg() *jobs.CronArg {
 	if configuration != nil {
 		return &jobs.CronArg{
 			PoolSize: configuration.CronService.PoolSize,
+		}
+	}
+	return nil
+}
+
+//client程序的配制
+func GetExeConfig() * ctrl.ExeConfig {
+	if configuration != nil {
+		return &ctrl.ExeConfig{
+			ClientPath : configuration.ExeConfig.ClientPath,
+			TempZipFolder:configuration.ExeConfig.TempZipFolder,
+			TaskFolder:configuration.ExeConfig.TaskFolder,
 		}
 	}
 	return nil

@@ -8,4 +8,8 @@ apiserver:
     bind: :8985
 cron:
   poolsize: 10
+exeinfo:
+    clientpath: D:\code\JobScheduleClient\bin
+    tempzipfolder: TempFile
+    taskfolder: Data
 ...

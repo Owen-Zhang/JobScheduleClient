@@ -4,10 +4,18 @@ import (
 	"jobworker/jobs"
 	"model"
 	"utils/system"
+	"os"
+	"fmt"
+	"strings"
+	"io/ioutil"
+	"strconv"
+	"net/http"
 	"regexp"
+	"io"
 )
 
 //运行任务(包括新增和重新启动)
+//这个是否要先判断version后再去下载什么文件等
 func (this *Controller) start(request *Action) {
 	//1: 查询数据，得到相关的实体数据
 	task := this.Storage.GetTaskById(request.Id)
@@ -15,33 +23,126 @@ func (this *Controller) start(request *Action) {
 		return
 	}
 
-	//2: 看是否为新增，如果为新增看是否要下载文件(如果只是启动，还是要看文件夹是否存在等)
-	if request.ZipFileUrl != "" {
-		filename := system.UrlFileName(request.ZipFileUrl)
-		flag, _ := regexp.MatchString(`^.+\.zip$`, filename)
-		if flag && filename != task.OldZipFile {
-			//下载文件
-			/*
-			res, err := http.Get(url)
-			if err != nil {
-				panic(err)
+	/*
+		defer func() {
+			if err := recover(); err != nil {
+				fmt.Printf("run wrong : %s\n", err)
 			}
-			f, err := os.Create("qq.exe")
-			if err != nil {
-				panic(err)
+		}()
+	*/
+
+	command := task.Command
+
+	if task.TaskType == 1 {
+		//运行上传的文件
+		taskfolder := strings.TrimSpace(task.RunFilefolder)
+		datapath := fmt.Sprintf("%s\\%s\\%s\\", this.ExeConfig.ClientPath, this.ExeConfig.TaskFolder, taskfolder)
+		if !system.FileExist(datapath) {
+			//数据文件夹没有，需要创建相关的文件夹
+			if err := os.MkdirAll(datapath, 0777); err != nil {
+				fmt.Printf("create run fileFolder err : %s", err.Error())
+				return
 			}
-			io.Copy(f, res.Body)
-			*/
 		}
+
+		configfile := fmt.Sprintf("%s\\config.txt", datapath)
+		if !system.FileExist(configfile) {
+			file, err := os.Create(configfile)
+			if err != nil {
+				fmt.Printf("create config file err: %s", err.Error())
+				return
+			}
+			file.Close()
+		}
+
+		bytes, err := ioutil.ReadFile(configfile)
+		if err != nil {
+			fmt.Printf("read config file err: %s", err.Error())
+			return
+		}
+		needpullfile := false
+		if bytes != nil {
+			contents := string(bytes)
+			if len(contents) > 0 {
+				version := strings.Split(contents, ":")[1]
+				if err != nil {
+					fmt.Printf("config file version err: %s", err.Error())
+					return
+				}
+				if version != strconv.Itoa(task.Version) {
+					needpullfile = true
+				}
+			} else {
+				needpullfile = true
+			}
+		} else {
+			needpullfile = true
+		}
+
+		//需要更新文件，同时更新配制
+		if needpullfile {
+			filename := system.UrlFileName(task.ZipFilePath)
+			flag, _ := regexp.MatchString(`^.+\.zip$`, filename)
+			if !flag {
+				fmt.Println("zipfilepath has err, end must *.zip file")
+				return
+			}
+
+			//下载文件
+			res, err := http.Get(task.ZipFilePath)
+			if err != nil {
+				fmt.Printf("DownLoad File err: %s\n",err.Error())
+				return
+			}
+
+			zipfile := fmt.Sprintf("%s\\%s\\%s", this.ExeConfig.ClientPath, this.ExeConfig.TempZipFolder, filename)
+			file, err := os.Create(zipfile)
+			if err != nil {
+				fmt.Printf("save temp file err: %s\n", err.Error())
+				return
+			}
+
+			if _,err := io.Copy(file, res.Body); err != nil {
+				fmt.Printf("copy temp file err: %s\n", err.Error())
+				return
+			}
+			defer func() {
+				res.Body.Close()
+			}()
+
+			//解压到指定的文件夹中
+			runfolder := fmt.Sprintf("%s\\Run\\", datapath)
+			if err := system.UnzipFile(zipfile, runfolder); err != nil {
+				fmt.Printf("unzipfile has wrong err: %s", err.Error())
+				return
+			}
+
+			defer func() {
+				file.Close()
+				os.Remove(zipfile)
+			}()
+
+			//更新配制
+			configcontent := []byte(fmt.Sprintf("version:%d", task.Version))
+			err = ioutil.WriteFile(configfile, configcontent , os.ModeAppend)
+			if err != nil {
+				fmt.Printf("uupdate config file has wrong err: %s", err.Error())
+				return
+			}
+		}
+		command = fmt.Sprintf("%s\\Run\\%s", datapath, task.Command)
+		fmt.Println(command)
 	}
 
-	//3: 如果有文件要下载，下载后要解压到指定的文件夹中
-	//4: 构造Task结构体
+	if !jobs.ExistJob(task.Id) {
+		jobs.RemoveJob(task.Id)
+	}
+
 	jobs.AddJob(&model.Task{
-		Id:       12,
-		Name:     "testJob",
-		CronSpec: "0 */1 * * * ?",
-		Command:  "echo first",
+		Id:       task.Id,
+		Name:     task.Name,
+		CronSpec: task.CronSpec, //"0 */1 * * * ?",
+		Command:  command,
 	})
 }
 

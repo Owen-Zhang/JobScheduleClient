@@ -7,7 +7,7 @@ import (
 	"jobworker/etc"
 	"jobworker/jobs"
 	"jobworker/storage"
-	"fmt"
+	"errors"
 )
 
 type JobWork struct {
@@ -26,14 +26,16 @@ func NewWorker() (*JobWork, error) {
 	}
 
 	storagearg := etc.GetStorageArg()
-
-	fmt.Printf("Hosts:%s; DBName:%s; Password:%s; User:%s; Port:%d",storagearg.Hosts, storagearg.DBName, storagearg.Password, storagearg.User, storagearg.Port)
-
 	dataaccess, err := storage.NewDataStorage(storagearg)
 	if err != nil {
 		return nil, err
 	}
-	controller := ctrl.NewController(dataaccess)
+
+	execonfig := etc.GetExeConfig()
+	if execonfig == nil {
+		return nil, errors.New("get execonfig is wrong")
+	}
+	controller := ctrl.NewController(dataaccess, execonfig)
 	apiserver := api.NewAPiServer(etc.GetApiServerArg(), controller)
 	jobs.NewCron(etc.GetCronArg(), dataaccess)
 

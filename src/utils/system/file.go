@@ -6,7 +6,10 @@ import (
 	"strings"
 	"path"
 	"fmt"
+	"errors"
 	"github.com/satori/go.uuid"
+	"github.com/mholt/archiver"
+
 )
 
 func FileExist(filename string) bool {
@@ -163,4 +166,21 @@ func UrlFileName(url string) string  {
 	arrry2 := strings.Split(filename, "?")
 
 	return arrry2[0]
+}
+
+func UnzipFile(filePath, rundatafolder string) error {
+	if filePath == "" {
+		return errors.New("filePath is empty")
+	}
+
+	if !IsExist(rundatafolder) {
+		if err := os.MkdirAll(rundatafolder, 0777); err != nil {
+			return err
+		}
+		if err := archiver.Zip.Open(filePath, rundatafolder); err != nil {
+			return err
+		}
+		return nil
+	}
+	return nil
 }

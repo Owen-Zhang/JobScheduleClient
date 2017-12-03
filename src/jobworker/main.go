@@ -4,12 +4,17 @@ import (
 	"jobworker/server"
 	"os"
 	"utils/system"
+	"fmt"
 )
+
+// http://127.0.0.1:8084/task/Console.zip
 
 func main() {
 
 	defer func() {
-		recover()
+		if err := recover(); err != nil {
+			fmt.Println(err)
+		}
 	}()
 
 	work, err := server.NewWorker()

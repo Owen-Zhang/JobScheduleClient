@@ -7,14 +7,14 @@ import (
 
 //根据id获取相关的任务信息
 func (this *DataStorage) GetTaskById(idinput int) *model.Task {
-	sqltext := "SELECT id, task_name, cron_spec, run_file_folder, old_zip_file, concurrent, command, notify, notify_email, timeout, version from task where STATUS = 1 and id=?;"
+	sqltext := "SELECT id, task_type, task_name, cron_spec, run_file_folder, old_zip_file, concurrent, command, notify, notify_email, timeout, version, zip_file_path from task where STATUS = 1 and id=?;"
 	row := this.db.QueryRow(sqltext, idinput)
 
-	var id int
-	var task_name, cron_spec, run_file_folder, old_zip_file, command, notify_email string
-	var timeout, version int32
+	var id, task_type,version int
+	var task_name, cron_spec, run_file_folder, old_zip_file, command, notify_email, zip_file_path string
+	var timeout  int32
 	var notify, concurrent int8
-	err := row.Scan(&id, &task_name, &cron_spec, &run_file_folder, &old_zip_file, &concurrent, &command, &notify, &notify_email, &timeout, &version)
+	err := row.Scan(&id, &task_type, &task_name, &cron_spec, &run_file_folder, &old_zip_file, &concurrent, &command, &notify, &notify_email, &timeout, &version, &zip_file_path)
 
 	if err != nil {
 		fmt.Println(err)
@@ -22,6 +22,7 @@ func (this *DataStorage) GetTaskById(idinput int) *model.Task {
 	}
 	return &model.Task {
 		Id : id,
+		TaskType:task_type,
 		Name: task_name,
 		CronSpec:cron_spec,
 		RunFilefolder: run_file_folder,
@@ -32,6 +33,7 @@ func (this *DataStorage) GetTaskById(idinput int) *model.Task {
 		Concurrent : concurrent,
 		TimeOut: timeout,
 		Version: version,
+		ZipFilePath:zip_file_path,
 	}
 }
 

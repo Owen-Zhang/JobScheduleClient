@@ -39,7 +39,7 @@ func AddJob(task *model.Task) bool {
 	lock.Lock()
 	defer lock.Unlock()
 
-	if getEntryById(job.id) != nil {
+	if ExistJob(job.id) {
 		return false
 	}
 
@@ -59,6 +59,18 @@ func RemoveJob(id int) {
 		}
 		return false
 	})
+}
+
+func ExistJob(id int) bool  {
+	entries := mainCron.Entries()
+	for _, e := range entries {
+		if v, flag := e.Job.(*Job); flag {
+			if v.id == id {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func getEntryById(id int) *cron.Entry {
