@@ -1,10 +1,5 @@
 package model
 
-type TaskNew struct {
-	Id         int 		`json:"id"`         //任务的主键
-	ZipFileUrl string   `json:"zipfileurl"` //zip文件的下载地址
-}
-
 type Task struct {
 	Id          	int           //任务的主键
 	TaskType    	int           //任务类型 0命令型，1运行本地文件(上传文件),2调用外部接口

@@ -15,21 +15,12 @@ import (
 )
 
 //运行任务(包括新增和重新启动)
-//这个是否要先判断version后再去下载什么文件等
 func (this *Controller) start(request *Action) {
 	//1: 查询数据，得到相关的实体数据
 	task := this.Storage.GetTaskById(request.Id)
 	if task == nil {
 		return
 	}
-
-	/*
-		defer func() {
-			if err := recover(); err != nil {
-				fmt.Printf("run wrong : %s\n", err)
-			}
-		}()
-	*/
 
 	command := task.Command
 
@@ -131,7 +122,6 @@ func (this *Controller) start(request *Action) {
 			}
 		}
 		command = fmt.Sprintf("%s\\Run\\%s", datapath, task.Command)
-		fmt.Println(command)
 	}
 
 	if !jobs.ExistJob(task.Id) {
@@ -148,14 +138,15 @@ func (this *Controller) start(request *Action) {
 
 //停止任务
 func (this *Controller) stop(id int) {
-	//1: 查询数据，看是否存在此任务
-	//2: 终止任务运行
-	//3: 更改数据库的状态信息
+	jobs.RemoveJob(id)
 }
 
 //删除任务
 func (this *Controller) delete(id int) {
-	//1: 查询数据，看是否存在此任务
-	//2: 终止任务运行
-	//3: 删除数据库的任务
+	if jobs.ExistJob(id) {
+		jobs.RemoveJob(id)
+	}
+	if err := this.Storage.DeleteTask(id); err != nil {
+		fmt.Printf("Delete Task has wrong: %s", err.Error())
+	}
 }

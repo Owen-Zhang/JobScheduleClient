@@ -37,6 +37,12 @@ func (this *DataStorage) GetTaskById(idinput int) *model.Task {
 	}
 }
 
+//删除任务
+func (this *DataStorage) DeleteTask(id int)  error {
+	_, err := this.db.Exec("update task set `delete` = 1 where id=?;",id)
+	return err
+}
+
 //更新任务的相关信息
 func (this *DataStorage) UpdateTask () {
 	

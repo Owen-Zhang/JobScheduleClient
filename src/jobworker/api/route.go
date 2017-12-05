@@ -7,11 +7,8 @@ func (this *ApiServer) InitRoute() {
 	//服务器心跳检查worker的运行状态
 	worker.POST("/ping", this.ping)
 
-	//新增任务
-	worker.POST("/newtask", this.newtask)
-
 	//运行任务
-	worker.POST("/starttask", this.starttask)
+	worker.POST("/starttask/:id", this.starttask)
 
 	//停止任务
 	worker.POST("stoptask/:id", this.stoptask)

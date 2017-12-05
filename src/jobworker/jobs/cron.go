@@ -51,6 +51,9 @@ func AddJob(task *model.Task) bool {
 
 //删除运行中的任务
 func RemoveJob(id int) {
+	if !ExistJob(id) {
+		return
+	}
 	mainCron.RemoveJob(func(e *cron.Entry) bool {
 		if v, flag := e.Job.(*Job); flag {
 			if v.id == id {
@@ -61,6 +64,7 @@ func RemoveJob(id int) {
 	})
 }
 
+//判断任务是否在指行队列中
 func ExistJob(id int) bool  {
 	entries := mainCron.Entries()
 	for _, e := range entries {
@@ -73,6 +77,7 @@ func ExistJob(id int) bool  {
 	return false
 }
 
+/*
 func getEntryById(id int) *cron.Entry {
 	entries := mainCron.Entries()
 	for _, e := range entries {
@@ -84,3 +89,4 @@ func getEntryById(id int) *cron.Entry {
 	}
 	return nil
 }
+*/
