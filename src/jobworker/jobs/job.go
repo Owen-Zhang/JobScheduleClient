@@ -86,12 +86,40 @@ func (this *Job) Run() {
 
 	cmdOut, cmdErr, err, isTimeout := this.runFunc(timeout)
 	ut := time.Now().Sub(t) / time.Millisecond
-	fmt.Printf("cmdOut:%s; cmdErr: %s; err:%s; isTimeout: %t; \n", cmdOut, cmdErr, err, isTimeout)
-	fmt.Println(ut)
+
+	//fmt.Printf("cmdOut:%s; cmdErr: %s; err:%s; isTimeout: %t; \n", cmdOut, cmdErr, err, isTimeout)
+	//fmt.Println(ut)
+
+	//更新任务执行时间等
+	if err := data.UpdateTask(t.Unix(),this.task.Id); err != nil {
+		fmt.Printf("update task has error: %s", err.Error())
+	}
 
 	//写日志
+	log := &model.TaskLog{
+		TaskId 		: this.task.Id,
+		Output 		: cmdOut,
+		Error  		: cmdErr,
+		ProcessTime : int(ut),
+		CreateTime  : t.Unix(),
+		Status      : model.TASK_SUCCESS,
+	}
+	if isTimeout {
+		log.Status = model.TASK_TIMEOUT
+		log.Error = fmt.Sprintf("任务执行超过 %d 秒\n---------------\n%s\n", int(timeout/time.Second), cmdErr)
+	} else if err != nil {
+		log.Status = model.TASK_ERROR
+		log.Error = err.Error() + ":" + cmdErr
+	}
+	data.AddTaskLog(log)
+
 	//发邮件
-	//更新任务执行时间等
+
+	/*
+	if (this.task.Notify == 1 && err != nil) || this.task.Notify == 2 {
+
+	}
+	*/
 }
 
 func runCmdWithTimeOut(cmd *exec.Cmd, timeout time.Duration) (error, bool) {
@@ -114,7 +142,6 @@ func runCmdWithTimeOut(cmd *exec.Cmd, timeout time.Duration) (error, bool) {
 		return err, true
 
 	case err = <-done:
-		fmt.Printf("err is %s", err)
 		return err, false
 	}
 }

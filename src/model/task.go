@@ -1,5 +1,12 @@
 package model
 
+const (
+	TASK_SUCCESS = 0  // 任务执行成功
+	TASK_ERROR   = -1 // 任务执行出错
+	TASK_TIMEOUT = -2 // 任务执行超时
+)
+
+//任务
 type Task struct {
 	Id          	int           //任务的主键
 	TaskType    	int           //任务类型 0命令型，1运行本地文件(上传文件),2调用外部接口
@@ -14,4 +21,15 @@ type Task struct {
 	NotifyEmail 	string 		  //通知的邮件地址
 	Version     	int  		  //程序的版本号
 	ZipFilePath     string 		  //zip的存储位置
+}
+
+//任务执行日志
+type TaskLog struct {
+	Id 			int				  //日志主键
+	TaskId  	int				  //任务主键
+	Output      string            //正常输出值
+	Error		string			  //错误输出值
+	ProcessTime int				  //执行时间
+	CreateTime  int64			  //创建时间
+	Status      int				  //日志状态
 }

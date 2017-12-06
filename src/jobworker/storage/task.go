@@ -7,7 +7,7 @@ import (
 
 //根据id获取相关的任务信息
 func (this *DataStorage) GetTaskById(idinput int) *model.Task {
-	sqltext := "SELECT id, task_type, task_name, cron_spec, run_file_folder, old_zip_file, concurrent, command, notify, notify_email, timeout, version, zip_file_path from task where STATUS = 1 and id=?;"
+	sqltext := "SELECT id, task_type, task_name, cron_spec, run_file_folder, old_zip_file, concurrent, command, notify, notify_email, timeout, version, zip_file_path from task where STATUS = 1 and `delete` = 0 and id=?;"
 	row := this.db.QueryRow(sqltext, idinput)
 
 	var id, task_type,version int
@@ -44,12 +44,16 @@ func (this *DataStorage) DeleteTask(id int)  error {
 }
 
 //更新任务的相关信息
-func (this *DataStorage) UpdateTask () {
-	
+func (this *DataStorage) UpdateTask (prevtime int64, id int) error {
+	_, err := this.db.Exec("update task set prev_time = ?, execute_times = execute_times + 1 where id=?;", prevtime, id)
+	return err
 }
 
 //增加日志信息
-func (this *DataStorage) AddTaskLog() {
-	
+func (this *DataStorage) AddTaskLog(log *model.TaskLog) error {
+	_, err := this.db.Exec(
+			"INSERT into task_log(task_id, output, error, `status`, process_time, create_time) VALUES(?,?,?,?,?,?)",
+			log.TaskId, log.Output, log.Error, log.Status, log.ProcessTime, log.CreateTime)
+	return err
 }
 
