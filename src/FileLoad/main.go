@@ -4,11 +4,13 @@ package main
 import "os"
 import "io"
 import "fmt"
-import "net/http"
+import (
+	"net/http"
+)
 
 func main() {
 	http.HandleFunc("/upload", uploadHandler)
-	http.Handle("/load", http.StripPrefix("/staticfile/",http.FileServer(http.Dir("./staticfile"))))
+	http.Handle("/", http.StripPrefix("/",http.FileServer(http.Dir("./staticfile"))))
 	fmt.Println("文件下载")
 	
 	http.ListenAndServe(":8988", nil)
@@ -24,7 +26,7 @@ func uploadHandler (w http.ResponseWriter, r *http.Request) {
 	        }
 			m := r.MultipartForm
 			files := m.File["uploadfile"]
-			fmt.Println("aaaa")
+
 	        for i, _ := range files {
 	            //for each fileheader, get a handle to the actual file
 	            file, err := files[i].Open()
