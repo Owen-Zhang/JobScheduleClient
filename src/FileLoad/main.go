@@ -7,6 +7,7 @@ import "fmt"
 import (
 	"io/ioutil"
 	"net/http"
+	"encoding/base64"
 )
 
 func main() {
@@ -20,13 +21,20 @@ func main() {
 		fmt.Println(err2.Error())
 		return
 	}
+	encodeString := base64.StdEncoding.EncodeToString(fd)
 	
 	file, err := os.Create("./staticfile/TEST.rar")
 	if err != nil {
 		fmt.Println(err.Error())
 		return
 	}
-	file.Write(fd)
+	filecontent, err3 := base64.StdEncoding.DecodeString(encodeString)
+	if err3 != nil {
+		fmt.Println(err3.Error())
+		return
+	}
+	
+	file.Write(filecontent)
 	file.Close()
 	
 	
