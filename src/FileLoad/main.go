@@ -17,6 +17,9 @@ func main() {
 }
 
 func uploadHandler (w http.ResponseWriter, r *http.Request) {
+	bytes := new ([]byte)
+	r.Body.Read(*bytes)
+
 	switch r.Method {
 		case "POST":
 			err := r.ParseMultipartForm(100000)
