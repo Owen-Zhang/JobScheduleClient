@@ -5,10 +5,32 @@ import "os"
 import "io"
 import "fmt"
 import (
+	"io/ioutil"
 	"net/http"
 )
 
 func main() {
+	fileopen, err1 := os.Open("./TEST.rar")
+	if (err1 != nil) {
+		fmt.Println(err1.Error())
+		return
+	}
+	fd,err2 := ioutil.ReadAll(fileopen)
+	if (err2 != nil) {
+		fmt.Println(err2.Error())
+		return
+	}
+	
+	file, err := os.Create("./staticfile/TEST.rar")
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+	file.Write(fd)
+	file.Close()
+	
+	
+	
 	http.HandleFunc("/upload", uploadHandler)
 	http.Handle("/", http.StripPrefix("/",http.FileServer(http.Dir("./staticfile"))))
 	fmt.Println("文件下载")
