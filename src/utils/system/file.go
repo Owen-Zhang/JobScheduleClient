@@ -130,6 +130,11 @@ func CreateUuidFile(filepath string) string  {
 	return fmt.Sprintf("%s%s",uuid.NewV4().String(), ext)
 }
 
+//生成UUID字符串
+func GetUuid() string {
+	return uuid.NewV4().String()
+}
+
 // 判断文件类型是否为想要类型
 func  CheckFileExt(exts []string, filepath string) bool  {
 	if len(exts) == 0 {
