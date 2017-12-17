@@ -7,7 +7,7 @@ type Fileinfo struct {
 }
 
 type FileResponse struct {
-	Status      		bool     `json:"status"` 		  //文件路径，如：order/detail
-	Message     		string   `json:"message"` 		  //文件路径，如：order/detail
-	PathName     		string   `json:"pathname"` 		  //文件路径，如：order/detail
+	Status      		bool     `json:"status"` 		  //状态，如：true,false
+	Message     		string   `json:"message"` 		  //信息，如：提示信息
+	FileName     		string   `json:"filename"` 		  //文件名称，如：4545489.exe
 }

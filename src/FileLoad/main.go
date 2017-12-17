@@ -14,9 +14,9 @@ import (
 )
 
 func main() {
+
 	http.HandleFunc("/upload", uploadHandler)
 	http.Handle("/", http.StripPrefix("/",http.FileServer(http.Dir("./staticfile"))))
-	fmt.Println("file server start")
 	
 	http.ListenAndServe(":8988", nil)
 }
@@ -76,8 +76,19 @@ func uploadHandler (w http.ResponseWriter, r *http.Request) {
 			}
 			file.Write(filecontent)
 
+			w.WriteHeader(http.StatusOK)
+			result.Status = true
+			result.Message = "保存成功"
+			result.FileName = fmt.Sprintf("%s/%s", body.FilePath, filename)
+
+			send(result, w)
+
 		default:
         	w.WriteHeader(http.StatusMethodNotAllowed)
+			send(&model.FileResponse{
+				Status:false,
+				Message:"上传文件请以POST方式提交",
+			}, w)
 	}
 }
 

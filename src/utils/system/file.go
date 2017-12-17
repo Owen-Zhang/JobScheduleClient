@@ -131,7 +131,8 @@ func CreateUuidFile(filepath string) string  {
 }
 
 //生成UUID字符串
-func GetUuid() string {
+func
+ GetUuid() string {
 	return uuid.NewV4().String()
 }
 
