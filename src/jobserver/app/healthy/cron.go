@@ -3,6 +3,7 @@ package healthy
 import (
 	"github.com/robfig/cron"
 	"sync"
+	"jobserver/app/models"
 	"model"
 )
 
@@ -16,14 +17,18 @@ func init()  {
 	mainCron.Start()
 }
 
-/*
+
 //加载worker，监控worker
 func InitHealthCheck(spec string) {
-	list, _ := models.TaskGetList(1, 1000000, "status", 1)
-	for _, task := range list {
-		AddHealthyCheck(spec, nil)
+	list, err := models.GetWorkerList()
+	if err != nil || list == nil || len(list) == 0 {
+		return
 	}
-}*/
+
+	for _, heal := range list {
+		AddHealthyCheck(spec, heal)
+	}
+}
 
 //增加心跳任务，检查worker机子是否正常运行
 func AddHealthyCheck(spec string, info *model.HealthInfo) bool {

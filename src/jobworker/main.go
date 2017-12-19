@@ -7,7 +7,6 @@ import (
 	"fmt"
 )
 
-// http://127.0.0.1:8084/task/Console.zip
 
 func main() {
 

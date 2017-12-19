@@ -1,3 +1,14 @@
+CREATE TABLE `worker` (
+  `id`          int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `name`        varchar(50)      NOT NULL DEFAULT '' COMMENT '机器名称',
+  `url`         varchar(100)     NOT NULL DEFAULT '' COMMENT '地址',
+  `port`        int(11)          NOT NULL DEFAULT '0'COMMENT '端口',
+  `systeminfo`  varchar(50)      NOT NULL DEFAULT '' COMMENT '系统信息(windows, linux,...)',
+  `status`      int(11)          NOT NULL DEFAULT '0'COMMENT 'worker的状态',
+
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE `task` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(11) NOT NULL DEFAULT '0' COMMENT '用户ID',

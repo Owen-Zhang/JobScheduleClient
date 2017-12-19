@@ -5,11 +5,13 @@ import (
 	"html/template"
 	"github.com/astaxie/beego"
 	"jobserver/app/controllers"
+	"jobserver/app/healthy"
 )
 
 func main()  {
 
-	//1: 加载要执行的任务数据
+	//1: 加载要执行的任务数据(多久去check worker的状态)
+	healthy.InitHealthCheck("")
 
 	// 设置默认404页面
 	beego.ErrorHandler("404", func(rw http.ResponseWriter, r *http.Request) {
