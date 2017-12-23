@@ -26,7 +26,7 @@ func newHealth(heart *model.HealthInfo) (*Health, error) {
 		health: heart,
 	}
 	hea.runFunc = func(timeout time.Duration) bool {
-		return runWithTimeOut(heart.WorkerUrl, heart.WorkerPort, timeout)
+		return runWithTimeOut(heart.Url, heart.Port, timeout)
 	}
 	return hea, nil
 }
@@ -41,14 +41,14 @@ func (this *Health) Run() {
 
 	if !flag {
 		this.count++
-		fmt.Printf("check [%s:%d] faild", this.health.WorkerUrl, this.health.WorkerPort)
+		fmt.Printf("check [%s:%d] faild", this.health.Url, this.health.Port)
 	} else {
 		this.count--
 	}
 
 	//此worker不可用, 提示相关信息，并将任务分配给其它的worker
 	if this.count >= 3 {
-		fmt.Printf("[%s:%d] 任务将要转移到其它worker", this.health.WorkerUrl, this.health.WorkerPort)
+		fmt.Printf("[%s:%d] 任务将要转移到其它worker", this.health.Url, this.health.Port)
 
 		//1: 处理转移任务
 

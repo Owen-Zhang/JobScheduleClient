@@ -44,7 +44,7 @@ func (this *DataStorage) DeleteTask(id int)  error {
 }
 
 //更新任务的相关信息
-func (this *DataStorage) UpdateTask (prevtime int64, id int) error {
+func (this *DataStorage) UpdateBackTask (prevtime int64, id int) error {
 	_, err := this.db.Exec("update task set prev_time = ?, execute_times = execute_times + 1 where id=?;", prevtime, id)
 	return err
 }
@@ -57,3 +57,28 @@ func (this *DataStorage) AddTaskLog(log *model.TaskLog) error {
 	return err
 }
 
+func (this *DataStorage) UpdateFrontTask(fields ...string) error {
+	return nil
+}
+
+func (this *DataStorage) TaskAdd(task *model.TaskExend) (int64, error) {
+	return 0, nil
+}
+
+func (this *DataStorage) TaskGetList(page, pageSize int, filters ...interface{}) ([]*model.TaskExend, int64) {
+	return nil, 0
+}
+
+func (this *DataStorage) TaskResetGroupId(groupId int) (int64, error) {
+	return 0, nil
+}
+
+func (this *DataStorage) TaskGetById(id int) (*model.TaskExend, error) {
+
+	return nil, nil
+}
+
+func (this *DataStorage) TaskDel(id int) error {
+
+	return nil
+}

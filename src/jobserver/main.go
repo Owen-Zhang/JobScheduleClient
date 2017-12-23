@@ -11,7 +11,7 @@ import (
 func main()  {
 
 	//1: 加载要执行的任务数据(多久去check worker的状态)
-	healthy.InitHealthCheck("")
+	healthy.InitHealthCheck("0 */1 * * * ?")
 
 	// 设置默认404页面
 	beego.ErrorHandler("404", func(rw http.ResponseWriter, r *http.Request) {

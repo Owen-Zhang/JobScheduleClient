@@ -1,7 +1,7 @@
 package ctrl
 
 import (
-	"jobworker/storage"
+	"storage"
 	"time"
 )
 

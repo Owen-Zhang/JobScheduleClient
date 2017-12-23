@@ -1,6 +1,6 @@
 package etc
 
-import "jobworker/storage"
+import "storage"
 import "gopkg.in/yaml.v2"
 
 import (

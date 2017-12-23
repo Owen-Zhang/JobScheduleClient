@@ -1,7 +1,7 @@
 package jobs
 
 import (
-	"jobworker/storage"
+	"storage"
 	"model"
 	"sync"
 

@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"jobserver/app/models"
 	"jobserver/app/libs"
+	"model"
 )
 
 const (
@@ -17,7 +18,7 @@ type BaseController struct {
 	beego.Controller
 	controllerName string
 	actionName     string
-	user           *models.User
+	user           *model.User
 	userId         int
 	userName       string
 	pageSize       int

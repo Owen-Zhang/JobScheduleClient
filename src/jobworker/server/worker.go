@@ -6,7 +6,7 @@ import (
 	"jobworker/ctrl"
 	"jobworker/etc"
 	"jobworker/jobs"
-	"jobworker/storage"
+	"storage"
 	"errors"
 )
 

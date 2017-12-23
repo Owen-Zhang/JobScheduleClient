@@ -91,7 +91,7 @@ func (this *Job) Run() {
 	//fmt.Println(ut)
 
 	//更新任务执行时间等
-	if err := data.UpdateTask(t.Unix(),this.task.Id); err != nil {
+	if err := data.UpdateBackTask(t.Unix(),this.task.Id); err != nil {
 		fmt.Printf("update task has error: %s", err.Error())
 	}
 

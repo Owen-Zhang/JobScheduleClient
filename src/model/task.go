@@ -23,13 +23,16 @@ type Task struct {
 	ZipFilePath     string 		  //zip的存储位置
 }
 
-//任务执行日志
-type TaskLog struct {
-	Id 			int				  //日志主键
-	TaskId  	int				  //任务主键
-	Output      string            //正常输出值
-	Error		string			  //错误输出值
-	ProcessTime int				  //执行时间
-	CreateTime  int64			  //创建时间
-	Status      int				  //日志状态
+//前端在使用
+type TaskExend struct {
+	Task
+	UserId       int     //用户编号
+	GroupId      int     //组
+	Description  string  //描述
+	RunFileName  string  //运行的文件
+	Status       int     //状态
+	ExecuteTimes int     //运行时间
+	PrevTime     int64   //上次运行的开始时间
+	CreateTime   int64   //创建时间
 }
+
