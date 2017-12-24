@@ -6,12 +6,34 @@ import (
 	"github.com/astaxie/beego"
 	"jobserver/app/controllers"
 	"jobserver/app/healthy"
+	"storage"
+	"fmt"
 )
 
 func main()  {
 
+	defer func(){
+		if err := recover(); err != nil {
+			fmt.Println(err)
+		}
+	}()
+
+	arg := &storage.DataStorageArgs{
+		Hosts: beego.AppConfig.String("db.host"),
+		DBName: beego.AppConfig.String("db.name"),
+		User: beego.AppConfig.String("db.user"),
+		Password: beego.AppConfig.String("db.password"),
+		Port: beego.AppConfig.DefaultInt("db.port", 3306),
+	}
+	dataaccess, errData := storage.NewDataStorage(arg)
+	if errData != nil {
+		fmt.Printf("init storage dataaccess has wrong: %s", errData)
+		return
+	}
+	defer dataaccess.Close()
+
 	//1: 加载要执行的任务数据(多久去check worker的状态)
-	healthy.InitHealthCheck("0 */1 * * * ?")
+	healthy.InitHealthCheck("0 */1 * * * ?", dataaccess)
 
 	// 设置默认404页面
 	beego.ErrorHandler("404", func(rw http.ResponseWriter, r *http.Request) {
@@ -21,6 +43,7 @@ func main()  {
 		t.Execute(rw, data)
 	})
 
+	controllers.InitCtrl(dataaccess)
 	beego.Router("/", &controllers.MainController{}, "*:Index")
 	beego.Router("/login", &controllers.MainController{}, "*:Login")
 	beego.Router("/logout", &controllers.MainController{}, "*:Logout")
@@ -32,4 +55,5 @@ func main()  {
 
 	beego.BConfig.WebConfig.Session.SessionOn = true
 	beego.Run()
+
 }

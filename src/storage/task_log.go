@@ -2,7 +2,7 @@ package storage
 
 import "model"
 
-func (*DataStorage) TaskLogGetList(page, pageSize int, filters ...interface{}) ([]*model.TaskLog, int64) {
+func (*DataStorage) TaskLogGetList(page, pageSize int) ([]*model.TaskLog, int64) {
 	return nil, 0
 }
 

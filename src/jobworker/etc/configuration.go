@@ -17,7 +17,7 @@ type Configuration struct {
 		DBName string `yaml:"dbname,omitempty"`
 		User   string   `yaml:"user,omitempty"`
 		Password string  `yaml:"password,omitempty"` 
-		Port int32  `yaml:"port,omitempty"`
+		Port int  `yaml:"port,omitempty"`
 	} `yaml:"storage,omitempty"`
 
 	ApiServer struct {
@@ -66,7 +66,7 @@ func makeDefault() *Configuration {
 			DBName string `yaml:"dbname,omitempty"`
 			User   string   `yaml:"user,omitempty"`
 			Password string  `yaml:"password,omitempty"` 
-			Port int32  `yaml:"port,omitempty"`
+			Port int  `yaml:"port,omitempty"`
 		}{
 			Hosts:  "127.0.0.1",
 			DBName: "jobschedule",

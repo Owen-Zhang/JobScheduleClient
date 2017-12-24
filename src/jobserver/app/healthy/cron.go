@@ -3,13 +3,14 @@ package healthy
 import (
 	"github.com/robfig/cron"
 	"sync"
-	"jobserver/app/models"
 	"model"
+	"storage"
 )
 
 var (
-	mainCron *cron.Cron
-	lock     sync.Mutex
+	mainCron 	*cron.Cron
+	lock     	sync.Mutex
+	dataaccess  *storage.DataStorage
 )
 
 func init()  {
@@ -19,8 +20,9 @@ func init()  {
 
 
 //加载worker，监控worker
-func InitHealthCheck(spec string) {
-	list, err := models.GetWorkerList()
+func InitHealthCheck(spec string, access *storage.DataStorage) {
+	dataaccess = access
+	list, err := dataaccess.GetWorkerList()
 	if err != nil || list == nil || len(list) == 0 {
 		return
 	}

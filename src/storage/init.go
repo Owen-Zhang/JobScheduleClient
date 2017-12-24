@@ -11,7 +11,7 @@ type DataStorageArgs struct {
 	DBName   string
 	User   	 string 
 	Password string  
-	Port     int32
+	Port     int
 }
 
 type DataStorage struct {
@@ -29,7 +29,7 @@ func NewDataStorage(arg *DataStorageArgs) (*DataStorage, error) {
 		fmt.Printf("数据库连接出错了：%s", err)
 		return nil, err
 	}
-	
+	//此处可以设置数据库最大连接数
 	datastorage := &DataStorage{
 		db : dbtemp,
 	}

@@ -4,15 +4,17 @@ import (
 	"github.com/astaxie/beego"
 	"strings"
 	"strconv"
-	"jobserver/app/models"
 	"jobserver/app/libs"
 	"model"
+	"storage"
 )
 
 const (
 	MSG_OK  = 0
 	MSG_ERR = -1
 )
+
+var dataaccess *storage.DataStorage
 
 type BaseController struct {
 	beego.Controller
@@ -22,6 +24,11 @@ type BaseController struct {
 	userId         int
 	userName       string
 	pageSize       int
+}
+
+
+func InitCtrl(access *storage.DataStorage)  {
+	dataaccess = access
 }
 
 func (this *BaseController) Prepare() {
@@ -47,7 +54,7 @@ func (this *BaseController) auth() {
 		idstr, password := arr[0], arr[1]
 		userId, _ := strconv.Atoi(idstr)
 		if userId > 0 {
-			user, err := models.UserGetById(userId)
+			user, err := dataaccess.UserGetById(userId)
 			if err == nil && password == libs.Md5([]byte(this.getClientIp()+"|"+user.Password+user.Salt)) {
 				this.userId = user.Id
 				this.userName = user.UserName

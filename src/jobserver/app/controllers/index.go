@@ -8,7 +8,6 @@ import (
 	"github.com/astaxie/beego/utils"
 	"strings"
 	"jobserver/app/libs"
-	"jobserver/app/models"
 )
 
 type MainController struct {
@@ -35,13 +34,13 @@ func (this *MainController) Index() {
 	}*/
 
 	// 最近执行的日志
-	logs, _ := models.TaskLogGetList(1, 20)
+	logs, _ := dataaccess.TaskLogGetList(1, 20)
 	recentLogs := make([]map[string]interface{}, len(logs))
 	for k, v := range logs {
-		task, err := models.TaskGetById(v.TaskId)
+		task, err := dataaccess.TaskGetById(v.TaskId)
 		taskName := ""
 		if err == nil {
-			taskName = task.TaskName
+			taskName = task.Name
 		}
 		row := make(map[string]interface{})
 		row["task_name"] = taskName
@@ -55,13 +54,13 @@ func (this *MainController) Index() {
 	}
 
 	// 最近执行失败的日志
-	logs, _ = models.TaskLogGetList(1, 20, "status__lt", 0)
+	logs, _ = dataaccess.TaskLogGetList(1, 20, "status__lt", 0)
 	errLogs := make([]map[string]interface{}, len(logs))
 	for k, v := range logs {
-		task, err := models.TaskGetById(v.TaskId)
+		task, err := dataaccess.TaskGetById(v.TaskId)
 		taskName := ""
 		if err == nil {
-			taskName = task.TaskName
+			taskName = task.Name
 		}
 		row := make(map[string]interface{})
 		row["task_name"] = taskName
@@ -84,12 +83,12 @@ func (this *MainController) Index() {
 // 个人信息
 func (this *MainController) Profile() {
 	beego.ReadFromRequest(&this.Controller)
-	user, _ := models.UserGetById(this.userId)
+	user, _ := dataaccess.UserGetById(this.userId)
 
 	if this.isPost() {
 		flash := beego.NewFlash()
 		user.Email = this.GetString("email")
-		user.Update()
+		dataaccess.UpdateUser()
 		password1 := this.GetString("password1")
 		password2 := this.GetString("password2")
 		if password1 != "" {
@@ -104,7 +103,7 @@ func (this *MainController) Profile() {
 			} else {
 				user.Salt = string(utils.RandomCreateBytes(10))
 				user.Password = libs.Md5([]byte(password1 + user.Salt))
-				user.Update()
+				dataaccess.UpdateUser()
 			}
 		}
 		flash.Success("修改成功！")
@@ -130,7 +129,7 @@ func (this *MainController) Login() {
 		password := strings.TrimSpace(this.GetString("password"))
 		remember := this.GetString("remember")
 		if username != "" && password != "" {
-			user, err := models.UserGetByName(username)
+			user, err := dataaccess.UserGetByName(username)
 			errorMsg := ""
 			if err != nil || user.Password != libs.Md5([]byte(password+user.Salt)) {
 				errorMsg = "帐号或密码错误"
@@ -139,7 +138,7 @@ func (this *MainController) Login() {
 			} else {
 				user.LastIp = this.getClientIp()
 				user.LastLogin = time.Now().Unix()
-				models.UserUpdate(user)
+				dataaccess.UserUpdate(user)
 
 				authkey := libs.Md5([]byte(this.getClientIp() + "|" + user.Password + user.Salt))
 				if remember == "yes" {

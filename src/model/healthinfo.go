@@ -7,5 +7,5 @@ type HealthInfo struct {
 	Url        string                           // 地址
 	Port       int                              // 端口
 	SystemInfo string                           // 系统信息(windows, linux,...)
-	Status     bool                             // 是否可用
+	Status     int                             // 是否可用
 }

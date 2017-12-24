@@ -4,8 +4,8 @@ import (
 	"strconv"
 	"github.com/astaxie/beego"
 	"strings"
-	"jobserver/app/models"
 	"jobserver/app/libs"
+	"model"
 )
 
 type GroupController struct {
@@ -18,7 +18,7 @@ func (this *GroupController) List() {
 		page = 1
 	}
 
-	list, count := models.TaskGroupGetList(page, this.pageSize)
+	list, count := dataaccess.TaskGroupGetList(page, this.pageSize)
 
 	this.Data["pageTitle"] = "分组列表"
 	this.Data["list"] = list
@@ -28,12 +28,12 @@ func (this *GroupController) List() {
 
 func (this *GroupController) Add() {
 	if this.isPost() {
-		group := new(models.TaskGroup)
+		group := new(model.TaskGroup)
 		group.GroupName = strings.TrimSpace(this.GetString("group_name"))
 		group.UserId = this.userId
 		group.Description = strings.TrimSpace(this.GetString("description"))
 
-		_, err := models.TaskGroupAdd(group)
+		_, err := dataaccess.TaskGroupAdd(group)
 		if err != nil {
 			this.ajaxMsg(err.Error(), MSG_ERR)
 		}
@@ -47,7 +47,7 @@ func (this *GroupController) Add() {
 func (this *GroupController) Edit() {
 	id, _ := this.GetInt("id")
 
-	group, err := models.TaskGroupGetById(id)
+	group, err := dataaccess.TaskGroupGetById(id)
 	if err != nil {
 		this.showMsg(err.Error())
 	}
@@ -55,7 +55,7 @@ func (this *GroupController) Edit() {
 	if this.isPost() {
 		group.GroupName = strings.TrimSpace(this.GetString("group_name"))
 		group.Description = strings.TrimSpace(this.GetString("description"))
-		err := group.Update()
+		err := dataaccess.UpdateGroup()
 		if err != nil {
 			this.ajaxMsg(err.Error(), MSG_ERR)
 		}
@@ -81,8 +81,8 @@ func (this *GroupController) Batch() {
 		}
 		switch action {
 		case "delete":
-			models.TaskGroupDelById(id)
-			models.TaskResetGroupId(id)
+			dataaccess.TaskGroupDelById(id)
+			dataaccess.TaskResetGroupId(id)
 		}
 	}
 

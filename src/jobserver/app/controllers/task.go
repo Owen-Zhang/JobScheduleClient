@@ -11,6 +11,7 @@ import (
 	"jobserver/app/models"
 	"jobserver/app/libs"
 	"jobserver/app/models/response"
+	"model"
 )
 
 type TaskController struct {
@@ -35,13 +36,13 @@ func (this *TaskController) List() {
 	if groupId > 0 {
 		filters = append(filters, "group_id", groupId)
 	}
-	result, count := models.TaskGetList(page, this.pageSize, filters...)
+	result, count := dataaccess.TaskGetList(page, this.pageSize, filters...)
 
 	list := make([]map[string]interface{}, len(result))
 	for k, v := range result {
 		row := make(map[string]interface{})
 		row["id"] = v.Id
-		row["name"] = v.TaskName
+		row["name"] = v.Name
 		row["cron_spec"] = v.CronSpec
 		row["status"] = v.Status
 		row["description"] = v.Description
@@ -73,7 +74,7 @@ func (this *TaskController) List() {
 	}
 
 	// 分组列表
-	groups, _ := models.TaskGroupGetList(1, 100)
+	groups, _ := dataaccess.TaskGroupGetList(1, 100)
 
 	this.Data["pageTitle"] = "任务列表"
 	this.Data["list"] = list
@@ -131,7 +132,7 @@ func (this *TaskController) UploadRunFile() {
 
 // 添加任务
 func (this *TaskController) Add() {
-	groups, _ := models.TaskGroupGetList(1, 100)
+	groups, _ := dataaccess.TaskGroupGetList(1, 100)
 	this.Data["groups"] = groups
 	this.Data["pageTitle"] = "添加任务"
 	this.display()
@@ -141,13 +142,13 @@ func (this *TaskController) Add() {
 func (this *TaskController) Edit() {
 	id, _ := this.GetInt("id")
 
-	task, err := models.TaskGetById(id)
+	task, err := dataaccess.TaskGetById(id)
 	if err != nil {
 		this.showMsg(err.Error())
 	}
 
 	// 分组列表
-	groups, _ := models.TaskGroupGetList(1, 100)
+	groups, _ := dataaccess.TaskGroupGetList(1, 100)
 	this.Data["groups"] = groups
 	this.Data["task"] = task
 	this.Data["pageTitle"] = "编辑任务"
@@ -162,10 +163,10 @@ func (this *TaskController) SaveTask() {
 		isNew = false
 	}
 
-	task := new(models.Task)
+	task := new(model.TaskExend)
 	if !isNew {
 		var err error
-		task, err = models.TaskGetById(id)
+		task, err = dataaccess.TaskGetById(id)
 		if err != nil {
 			this.showMsg(err.Error()) //处理成ajax
 		}
@@ -173,14 +174,14 @@ func (this *TaskController) SaveTask() {
 		task.UserId = this.userId
 	}
 
-	task.TaskName = strings.TrimSpace(this.GetString("task_name"))
+	task.Name = strings.TrimSpace(this.GetString("task_name"))
 	task.Description = strings.TrimSpace(this.GetString("description"))
 	task.GroupId, _ = this.GetInt("group_id")
 	task.Concurrent, _ = this.GetInt("concurrent")
 	task.CronSpec = strings.TrimSpace(this.GetString("cron_spec"))
 	task.Command = strings.TrimSpace(this.GetString("command"))
 	task.Notify, _ = this.GetInt("notify")
-	task.Timeout, _ = this.GetInt("timeout")
+	task.TimeOut, _ = this.GetInt("timeout")
 
 	isUploadNewFile := false
 	if task.OldZipFile != strings.TrimSpace(this.GetString("oldzipfile")) {
@@ -206,7 +207,7 @@ func (this *TaskController) SaveTask() {
 		task.NotifyEmail = strings.Join(emailList, ";")
 	}
 
-	if task.TaskName == "" || task.CronSpec == "" || task.Command == "" {
+	if task.Name == "" || task.CronSpec == "" || task.Command == "" {
 		resultData.Msg = "请填写完整信息"
 		this.jsonResult(resultData)
 	}
@@ -227,12 +228,12 @@ func (this *TaskController) SaveTask() {
 
 	//保存数据库
 	if isNew {
-		if _, err := models.TaskAdd(task); err != nil {
+		if _, err := dataaccess.TaskAdd(task); err != nil {
 			resultData.Msg = err.Error()
 			this.jsonResult(resultData)
 		}
 	} else {
-		if err := task.Update(); err != nil {
+		if err := dataaccess.UpdateFrontTask(); err != nil {
 			this.ajaxMsg(err.Error(), MSG_ERR)
 		}
 	}
@@ -268,12 +269,12 @@ func (this *TaskController) Logs() {
 		page = 1
 	}
 
-	task, err := models.TaskGetById(taskId)
+	task, err := dataaccess.TaskGetById(taskId)
 	if err != nil {
 		this.showMsg(err.Error())
 	}
 
-	result, count := models.TaskLogGetList(page, this.pageSize, "task_id", task.Id)
+	result, count := dataaccess.TaskLogGetList(page, this.pageSize, "task_id", task.Id)
 
 	list := make([]map[string]interface{}, len(result))
 	for k, v := range result {
@@ -297,12 +298,12 @@ func (this *TaskController) Logs() {
 func (this *TaskController) ViewLog() {
 	id, _ := this.GetInt("id")
 
-	taskLog, err := models.TaskLogGetById(id)
+	taskLog, err := dataaccess.TaskLogGetById(id)
 	if err != nil {
 		this.showMsg(err.Error())
 	}
 
-	task, err := models.TaskGetById(taskLog.TaskId)
+	task, err := dataaccess.TaskGetById(taskLog.TaskId)
 	if err != nil {
 		this.showMsg(err.Error())
 	}
@@ -336,7 +337,7 @@ func (this *TaskController) LogBatch() {
 		}
 		switch action {
 		case "delete":
-			models.TaskLogDelById(id)
+			dataaccess.TaskLogDelById(id)
 		}
 	}
 

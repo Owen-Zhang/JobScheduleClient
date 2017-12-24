@@ -10,10 +10,8 @@ func (this *DataStorage) GetTaskById(idinput int) *model.Task {
 	sqltext := "SELECT id, task_type, task_name, cron_spec, run_file_folder, old_zip_file, concurrent, command, notify, notify_email, timeout, version, zip_file_path from task where STATUS = 1 and `delete` = 0 and id=?;"
 	row := this.db.QueryRow(sqltext, idinput)
 
-	var id, task_type,version int
+	var id, task_type,version, notify, concurrent, timeout int
 	var task_name, cron_spec, run_file_folder, old_zip_file, command, notify_email, zip_file_path string
-	var timeout  int32
-	var notify, concurrent int8
 	err := row.Scan(&id, &task_type, &task_name, &cron_spec, &run_file_folder, &old_zip_file, &concurrent, &command, &notify, &notify_email, &timeout, &version, &zip_file_path)
 
 	if err != nil {
