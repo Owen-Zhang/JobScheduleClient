@@ -33,7 +33,7 @@ func (this *GroupController) Add() {
 		group.UserId = this.userId
 		group.Description = strings.TrimSpace(this.GetString("description"))
 
-		_, err := dataaccess.TaskGroupAdd(group)
+		err := dataaccess.TaskGroupAdd(group)
 		if err != nil {
 			this.ajaxMsg(err.Error(), MSG_ERR)
 		}
@@ -55,7 +55,7 @@ func (this *GroupController) Edit() {
 	if this.isPost() {
 		group.GroupName = strings.TrimSpace(this.GetString("group_name"))
 		group.Description = strings.TrimSpace(this.GetString("description"))
-		err := dataaccess.UpdateGroup()
+		err := dataaccess.UpdateGroup(group)
 		if err != nil {
 			this.ajaxMsg(err.Error(), MSG_ERR)
 		}
@@ -82,7 +82,6 @@ func (this *GroupController) Batch() {
 		switch action {
 		case "delete":
 			dataaccess.TaskGroupDelById(id)
-			dataaccess.TaskResetGroupId(id)
 		}
 	}
 

@@ -34,10 +34,10 @@ func (this *MainController) Index() {
 	}*/
 
 	// 最近执行的日志
-	logs, _ := dataaccess.TaskLogGetList(1, 20)
+	logs, _ := dataaccess.TaskLogGetList(1, 20, 1, 0)
 	recentLogs := make([]map[string]interface{}, len(logs))
 	for k, v := range logs {
-		task, err := dataaccess.TaskGetById(v.TaskId)
+		task, err := dataaccess.GetTaskById(v.TaskId)
 		taskName := ""
 		if err == nil {
 			taskName = task.Name
@@ -54,10 +54,10 @@ func (this *MainController) Index() {
 	}
 
 	// 最近执行失败的日志
-	logs, _ = dataaccess.TaskLogGetList(1, 20, "status__lt", 0)
+	logs, _ = dataaccess.TaskLogGetList(1, 20, -1, 0)
 	errLogs := make([]map[string]interface{}, len(logs))
 	for k, v := range logs {
-		task, err := dataaccess.TaskGetById(v.TaskId)
+		task, err := dataaccess.GetTaskById(v.TaskId)
 		taskName := ""
 		if err == nil {
 			taskName = task.Name

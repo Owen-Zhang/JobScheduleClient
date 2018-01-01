@@ -17,8 +17,13 @@ import (
 //运行任务(包括新增和重新启动)
 func (this *Controller) start(request *Action) {
 	//1: 查询数据，得到相关的实体数据
-	task := this.Storage.GetTaskById(request.Id)
-	if task == nil {
+	task, err := this.Storage.GetTaskById(request.Id)
+	if err != nil {
+		fmt.Printf("start task has wrong: %s", err)
+		return
+	}
+
+	if task == nil || task.Status != 1 {
 		return
 	}
 

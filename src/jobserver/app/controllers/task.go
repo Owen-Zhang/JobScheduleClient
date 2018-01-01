@@ -32,11 +32,7 @@ func (this *TaskController) List() {
 		page = 1
 	}
 	groupId, _ := this.GetInt("groupid")
-	filters := make([]interface{}, 0)
-	if groupId > 0 {
-		filters = append(filters, "group_id", groupId)
-	}
-	result, count := dataaccess.TaskGetList(page, this.pageSize, filters...)
+	result, count := dataaccess.TaskGetList(page, this.pageSize, -1, groupId)
 
 	list := make([]map[string]interface{}, len(result))
 	for k, v := range result {
@@ -84,7 +80,7 @@ func (this *TaskController) List() {
 	this.display()
 }
 
-// 上传要运行的文件
+// 上传要运行的文件(这个要修改)
 func (this *TaskController) UploadRunFile() {
 	f, h, err := this.GetFile("files[]")
 	defer f.Close()
@@ -117,6 +113,7 @@ func (this *TaskController) UploadRunFile() {
 			return
 		}
 
+		/*此处要修改，将文件保存到程序运行的目录中*/
 		filePath := upload.Tempfilepath + uuidFileName
 		os.MkdirAll(upload.Tempfilepath, 0777)
 		this.SaveToFile("files[]", filePath)
@@ -124,7 +121,7 @@ func (this *TaskController) UploadRunFile() {
 		uploadResult.IsSuccess = true
 		uploadResult.Data = &response.UploadFileInfo{
 			OldFileName: fileTool.Url,
-			NewFileName: filePath,
+			NewFileName: uuidFileName,
 		}
 		this.jsonResult(uploadResult)
 	}
@@ -142,7 +139,7 @@ func (this *TaskController) Add() {
 func (this *TaskController) Edit() {
 	id, _ := this.GetInt("id")
 
-	task, err := dataaccess.TaskGetById(id)
+	task, err := dataaccess.GetTaskById(id)
 	if err != nil {
 		this.showMsg(err.Error())
 	}
@@ -155,7 +152,7 @@ func (this *TaskController) Edit() {
 	this.display("task/add")
 }
 
-//保存任务
+//保存任务(要修改)
 func (this *TaskController) SaveTask() {
 	id, _ := this.GetInt("id", 0)
 	isNew := true
@@ -166,7 +163,7 @@ func (this *TaskController) SaveTask() {
 	task := new(model.TaskExend)
 	if !isNew {
 		var err error
-		task, err = dataaccess.TaskGetById(id)
+		task, err = dataaccess.GetTaskById(id)
 		if err != nil {
 			this.showMsg(err.Error()) //处理成ajax
 		}
@@ -189,6 +186,7 @@ func (this *TaskController) SaveTask() {
 		task.OldZipFile = strings.TrimSpace(this.GetString("oldzipfile"))
 	}
 
+	/*runFileName: 记录处理过的文件名; OldZipFile: 用户上传的文件*/
 	runFileName := strings.TrimSpace(this.GetString("runfilename"))
 	resultData := &response.ResultData{IsSuccess: false, Msg: ""}
 	notifyEmail := strings.TrimSpace(this.GetString("notify_email"))
@@ -216,6 +214,7 @@ func (this *TaskController) SaveTask() {
 		this.jsonResult(resultData)
 	}
 
+	//此处要去掉，上传文件到文件服务器
 	if isUploadNewFile {
 		//解压文件
 		runfileFolder, err2 := this.unzipUploadFile(runFileName)
@@ -228,12 +227,14 @@ func (this *TaskController) SaveTask() {
 
 	//保存数据库
 	if isNew {
-		if _, err := dataaccess.TaskAdd(task); err != nil {
+		task.Version = 1
+		if err := dataaccess.TaskAdd(task); err != nil {
 			resultData.Msg = err.Error()
 			this.jsonResult(resultData)
 		}
 	} else {
-		if err := dataaccess.UpdateFrontTask(); err != nil {
+		task.Version += 1
+		if err := dataaccess.UpdateFrontTask(task); err != nil {
 			this.ajaxMsg(err.Error(), MSG_ERR)
 		}
 	}
@@ -269,12 +270,12 @@ func (this *TaskController) Logs() {
 		page = 1
 	}
 
-	task, err := dataaccess.TaskGetById(taskId)
+	task, err := dataaccess.GetTaskById(taskId)
 	if err != nil {
 		this.showMsg(err.Error())
 	}
 
-	result, count := dataaccess.TaskLogGetList(page, this.pageSize, "task_id", task.Id)
+	result, count := dataaccess.TaskLogGetList(page, this.pageSize, 1, task.Id)
 
 	list := make([]map[string]interface{}, len(result))
 	for k, v := range result {
@@ -303,7 +304,7 @@ func (this *TaskController) ViewLog() {
 		this.showMsg(err.Error())
 	}
 
-	task, err := dataaccess.TaskGetById(taskLog.TaskId)
+	task, err := dataaccess.GetTaskById(taskLog.TaskId)
 	if err != nil {
 		this.showMsg(err.Error())
 	}
