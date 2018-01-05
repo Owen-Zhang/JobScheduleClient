@@ -10,6 +10,7 @@ import (
 	"fmt"
 )
 
+//worker机器要存一个zip文件名， 用来判断本地和服务器上的文件是否相同，不同的话就要更新
 func main()  {
 
 	defer func(){

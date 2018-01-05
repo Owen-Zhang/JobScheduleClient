@@ -8,22 +8,19 @@ import (
 	"github.com/robfig/cron"
 	"github.com/mholt/archiver"
 	"strconv"
-	"jobserver/app/models"
 	"jobserver/app/libs"
 	"jobserver/app/models/response"
 	"model"
+	"github.com/astaxie/beego/utils"
+	"utils/system"
+	"fmt"
 )
 
 type TaskController struct {
 	BaseController
 }
 
-var upload models.Uploadfile
-
-func init() {
-	upload.Tempfilepath = beego.AppConfig.String("upload.tempfolder")
-	upload.Runtimepath = beego.AppConfig.String("upload.runtimefolder")
-}
+const tempFileFolder  = "TempFile"
 
 // 任务列表
 func (this *TaskController) List() {
@@ -80,7 +77,6 @@ func (this *TaskController) List() {
 	this.display()
 }
 
-// 上传要运行的文件(这个要修改)
 func (this *TaskController) UploadRunFile() {
 	f, h, err := this.GetFile("files[]")
 	defer f.Close()
@@ -97,7 +93,7 @@ func (this *TaskController) UploadRunFile() {
 
 	} else {
 		fileTool := &libs.FileTool{Url: h.Filename}
-		exts := []string{"zip"} //这个要从配制文件中去取
+		exts := []string{"zip"}
 		if !fileTool.CheckFileExt(exts) {
 			uploadResult.Msg = "请上传正确的文件类型"
 			this.Data["json"] = uploadResult
@@ -113,9 +109,9 @@ func (this *TaskController) UploadRunFile() {
 			return
 		}
 
-		/*此处要修改，将文件保存到程序运行的目录中*/
-		filePath := upload.Tempfilepath + uuidFileName
-		os.MkdirAll(upload.Tempfilepath, 0777)
+		filePath := tempFileFolder + uuidFileName
+		os.Mkdir(tempFileFolder, 0777)
+
 		this.SaveToFile("files[]", filePath)
 
 		uploadResult.IsSuccess = true
@@ -186,7 +182,7 @@ func (this *TaskController) SaveTask() {
 		task.OldZipFile = strings.TrimSpace(this.GetString("oldzipfile"))
 	}
 
-	/*runFileName: 记录处理过的文件名; OldZipFile: 用户上传的文件*/
+	/*runFileName: 记录处理过的文件名(为了保存文件名不重复，重新取文件名); OldZipFile: 用户上传的文件*/
 	runFileName := strings.TrimSpace(this.GetString("runfilename"))
 	resultData := &response.ResultData{IsSuccess: false, Msg: ""}
 	notifyEmail := strings.TrimSpace(this.GetString("notify_email"))
@@ -215,14 +211,17 @@ func (this *TaskController) SaveTask() {
 	}
 
 	//此处要去掉，上传文件到文件服务器
-	if isUploadNewFile {
-		//解压文件
-		runfileFolder, err2 := this.unzipUploadFile(runFileName)
-		if err2 != nil {
-			resultData.Msg = err2.Error()
-			this.jsonResult(resultData)
+	if isUploadNewFile && task.OldZipFile != "" {
+
+		//上传文件到文件服务器
+		if system.IsExist(tempFileFolder + runFileName) {
+
+		} else {
+			fmt.Printf("TempFile %s is not exists", runFileName)
 		}
-		task.RunFileName = runfileFolder
+
+		//如果不是新增的话，也要更新此文件夹
+		task.RunFilefolder = system.GetUuid()
 	}
 
 	//保存数据库

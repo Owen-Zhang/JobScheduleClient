@@ -29,7 +29,7 @@ type TaskExend struct {
 	UserId       int     //用户编号
 	GroupId      int     //组
 	Description  string  //描述
-	RunFileName  string  //运行的文件
+	//RunFileName  string  //运行的文件
 	Status       int     //状态
 	ExecuteTimes int     //运行时间
 	PrevTime     int64   //上次运行的开始时间

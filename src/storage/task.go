@@ -63,6 +63,7 @@ func (this *DataStorage) UpdateBackTask (prevtime int64, id int) error {
 	return err
 }
 
+//更新也更新目录
 func (this *DataStorage) UpdateFrontTask(task *model.TaskExend) error {
 	if _, err := this.db.Exec(
 		`update task set group_id = ?, task_name = ?, task_type = ?, description = ?, cron_spec = ?,

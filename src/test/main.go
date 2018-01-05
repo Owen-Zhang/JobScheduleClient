@@ -1,6 +1,7 @@
 package main
 
 import (
+	/*
 	"net/http"
 	"os"
 	"fmt"
@@ -9,6 +10,12 @@ import (
 	"model"
 	"encoding/json"
 	"bytes"
+	"path/filepath"
+	*/
+	"os"
+	"fmt"
+	"os/exec"
+	"path/filepath"
 )
 
 func main()  {
@@ -19,6 +26,24 @@ func main()  {
 		}
 	}()
 
+	os.Mkdir("Temp", 0777)
+
+	file1, err1 := os.Create("Temp/1.txt")
+	if err1 != nil {
+		fmt.Println(err1)
+	}
+	file1.Close()
+
+	fmt.Println(os.Args[0])
+
+	file, err := exec.LookPath(os.Args[0])
+	if err != nil {
+		fmt.Println(err)
+	}
+	path := filepath.Dir(file)
+	fmt.Println(path)
+
+	/*
 
 	fileopen, err1 := os.Open("./jobworker.exe")
 	if err1 != nil {
@@ -66,6 +91,7 @@ func main()  {
 	}
 	fmt.Println(string(byteres))
 	resp.Body.Close()
+	*/
 
 	for ; ;  {
 		
