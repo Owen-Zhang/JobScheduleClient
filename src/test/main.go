@@ -1,7 +1,6 @@
 package main
 
 import (
-	/*
 	"net/http"
 	"os"
 	"fmt"
@@ -11,11 +10,9 @@ import (
 	"encoding/json"
 	"bytes"
 	"path/filepath"
-	*/
-	"os"
-	"fmt"
+	"time"
+	"log"
 	"os/exec"
-	"path/filepath"
 )
 
 func main()  {
@@ -25,6 +22,11 @@ func main()  {
 			fmt.Println(err)
 		}
 	}()
+	
+	
+	//loggerManager()
+	
+	//watchFile()
 
 	os.Mkdir("Temp", 0777)
 
@@ -43,8 +45,40 @@ func main()  {
 	path := filepath.Dir(file)
 	fmt.Println(path)
 
-	/*
+	for ; ;  {
+		
+	}
+}
 
+/*
+func watchFile() {
+	t, err := tail.TailFile("1.log", tail.Config{ReOpen: true,MustExist: false, Follow: true,Poll: true})
+	if err != nil {
+		fmt.Println(err)
+	}
+	for line := range t.Lines {
+	    fmt.Println(line.Text)
+	}
+}
+*/
+
+//记录日志(此方法不可取)
+func loggerManager() {
+	fileName := fmt.Sprintf("%s.txt", time.Now().Format("2006-01-02"))
+	file, err := os.OpenFile(fileName, os.O_CREATE|os.O_APPEND, 0666)
+	//file, err := os.Create(fileName)
+	if err != nil {
+		fmt.Println(err)
+		//return
+	}	
+	defer file.Close()
+	logIn := log.New(file, "[dddd]", log.Llongfile)
+	logIn.Println("test \n")
+	logIn.Fatalln("fatal\n")
+}
+
+//上传文件测试
+func uploadFile() {
 	fileopen, err1 := os.Open("./jobworker.exe")
 	if err1 != nil {
 		fmt.Println(err1.Error())
@@ -91,9 +125,12 @@ func main()  {
 	}
 	fmt.Println(string(byteres))
 	resp.Body.Close()
-	*/
-
-	for ; ;  {
-		
-	}
 }
+
+/*
+//获取电脑相关的cpu 等
+func getComputerInfo() {
+	v, _ := mem.VirtualMemory()
+	fmt.Println(v)
+}
+*/

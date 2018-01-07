@@ -20,7 +20,7 @@ type Task struct {
 	Notify      	int          //是否需要通知
 	NotifyEmail 	string 		  //通知的邮件地址
 	Version     	int  		  //程序的版本号
-	ZipFilePath     string 		  //zip的存储位置
+	ZipFilePath     string 		  //zip的存储位置(只有相对路径,不包含ip和端口)
 }
 
 //前端在使用

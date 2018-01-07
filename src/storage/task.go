@@ -68,10 +68,10 @@ func (this *DataStorage) UpdateFrontTask(task *model.TaskExend) error {
 	if _, err := this.db.Exec(
 		`update task set group_id = ?, task_name = ?, task_type = ?, description = ?, cron_spec = ?,
 				old_zip_file = ?, concurrent = ?, command = ?, notify = ?, notify_email = ?, timeout = ?,
-				version = ?, zip_file_path = ? where id = ?`,
+				version = ?, zip_file_path = ?, run_file_folder = ?  where id = ?`,
 		task.GroupId, task.Name, task.TaskType, task.Description, task.CronSpec,
 		task.OldZipFile, task.Concurrent, task.Command, task.Notify, task.NotifyEmail, task.TimeOut,
-		task.Version, task.ZipFilePath, task.Id); err != nil {
+		task.Version, task.ZipFilePath, task.RunFilefolder, task.Id); err != nil {
 			return err
 	}
 	return nil

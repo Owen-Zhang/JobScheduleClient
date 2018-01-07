@@ -2,18 +2,21 @@ package controllers
 
 import (
 	"time"
-	"github.com/astaxie/beego"
 	"os"
 	"strings"
-	"github.com/robfig/cron"
-	"github.com/mholt/archiver"
 	"strconv"
-	"jobserver/app/libs"
-	"jobserver/app/models/response"
 	"model"
-	"github.com/astaxie/beego/utils"
 	"utils/system"
 	"fmt"
+
+	"jobserver/app/libs"
+	"github.com/astaxie/beego"
+	"jobserver/app/models/response"
+	"github.com/robfig/cron"
+	"github.com/imroc/req"
+	"io/ioutil"
+	"encoding/base64"
+	"errors"
 )
 
 type TaskController struct {
@@ -109,10 +112,15 @@ func (this *TaskController) UploadRunFile() {
 			return
 		}
 
-		filePath := tempFileFolder + uuidFileName
+		filePath := tempFileFolder + "/" + uuidFileName
 		os.Mkdir(tempFileFolder, 0777)
 
-		this.SaveToFile("files[]", filePath)
+		if err := this.SaveToFile("files[]", filePath); err != nil {
+			uploadResult.Msg = err.Error()
+			this.Data["json"] = uploadResult
+			this.ServeJSON()
+			return
+		}
 
 		uploadResult.IsSuccess = true
 		uploadResult.Data = &response.UploadFileInfo{
@@ -161,7 +169,7 @@ func (this *TaskController) SaveTask() {
 		var err error
 		task, err = dataaccess.GetTaskById(id)
 		if err != nil {
-			this.showMsg(err.Error()) //处理成ajax
+			this.showMsg(err.Error())
 		}
 	} else {
 		task.UserId = this.userId
@@ -184,8 +192,9 @@ func (this *TaskController) SaveTask() {
 
 	/*runFileName: 记录处理过的文件名(为了保存文件名不重复，重新取文件名); OldZipFile: 用户上传的文件*/
 	runFileName := strings.TrimSpace(this.GetString("runfilename"))
-	resultData := &response.ResultData{IsSuccess: false, Msg: ""}
 	notifyEmail := strings.TrimSpace(this.GetString("notify_email"))
+
+	resultData := &response.ResultData{IsSuccess: false, Msg: ""}
 	if notifyEmail != "" {
 		emailList := make([]string, 0)
 		tmp := strings.Split(notifyEmail, ";")
@@ -213,15 +222,22 @@ func (this *TaskController) SaveTask() {
 	//此处要去掉，上传文件到文件服务器
 	if isUploadNewFile && task.OldZipFile != "" {
 
+		filepath := tempFileFolder + "/" +  runFileName
 		//上传文件到文件服务器
-		if system.IsExist(tempFileFolder + runFileName) {
-
+		if system.IsExist(filepath) {
+			filename, err := this.uploadfile(filepath)
+			if err != nil {
+				resultData.Msg = err.Error()
+				this.jsonResult(resultData)
+			}
+			task.ZipFilePath = filename
 		} else {
-			fmt.Printf("TempFile %s is not exists", runFileName)
+			resultData.Msg = fmt.Sprintf("TempFile/%s is not exists", runFileName)
+			this.jsonResult(resultData)
 		}
-
-		//如果不是新增的话，也要更新此文件夹
-		task.RunFilefolder = system.GetUuid()
+		if task.RunFilefolder == "" {
+			task.RunFilefolder = system.GetUuid()
+		}
 	}
 
 	//保存数据库
@@ -242,23 +258,42 @@ func (this *TaskController) SaveTask() {
 	this.jsonResult(resultData)
 }
 
-func (this *TaskController) unzipUploadFile(filePath string) (string, error) {
-	if filePath == "" {
-		return "", nil
+// uploadfile 上传文件到文件服务器
+func (this *TaskController) uploadfile(filename string) (string, error) {
+	url := fmt.Sprintf("http://%s:%s/upload",
+		beego.AppConfig.String("file.host"),
+		beego.AppConfig.String("file.port"))
+
+	fileopen, err1 := os.Open(filename)
+	if err1 != nil {
+		fmt.Println(err1.Error())
+		return "", err1
+	}
+	defer fileopen.Close()
+
+	fd,err2 := ioutil.ReadAll(fileopen)
+	if err2 != nil {
+		fmt.Println(err2.Error())
+		return "", err2
+	}
+	encodeString := base64.StdEncoding.EncodeToString(fd)
+
+	fileresponse, err :=
+		req.Post(url, req.BodyJSON(&model.Fileinfo{
+			FilePath: "job",
+			FileSuffixName: "zip",
+			FileContent: encodeString,
+		}))
+	if err != nil {
+		return "", err
 	}
 
-	fileTool := &libs.FileTool{Url: filePath}
-	if fileTool.IsExist() {
-		runFileFolder := upload.Runtimepath + fileTool.FileName() + "/"
-		if err := os.MkdirAll(runFileFolder, 0777); err != nil {
-			return "", err
-		}
-		if err2 := archiver.Zip.Open(filePath, runFileFolder); err2 != nil {
-			return "", err2
-		}
-		return runFileFolder, nil
+	var res = &model.FileResponse{}
+	fileresponse.ToJSON(res)
+	if !res.Status {
+		return "", errors.New(res.Message)
 	}
-	return "", nil
+	return res.FileName, nil
 }
 
 // 任务执行日志列表
