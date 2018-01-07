@@ -9,17 +9,17 @@ import (
 func (this *DataStorage) GetTaskById(idinput int) (*model.TaskExend, error) {
 	sqltext := `SELECT id, user_id, group_id, task_name, task_type, description, cron_spec, run_file_folder,
 			old_zip_file, concurrent, command, status, notify, notify_email, timeout, execute_times,
-			prev_time, create_time, version, zip_file_path from task where deleted = 0 and id=?;`
+			prev_time, create_time, version, zip_file_path, worker_id from task where deleted = 0 and id=?;`
 
 	row := this.db.QueryRow(sqltext, idinput)
 
 	var task_name,description, cron_spec, run_file_folder, old_zip_file, command, notify_email, zip_file_path string
-	var id, user_id, group_id,task_type, concurrent, status, notify, timeout, execute_times, version int
+	var id, user_id, group_id,task_type, concurrent, status, notify, timeout, execute_times, version, worker_id int
 	var create_time, prev_time int64
 
 	if er := row.Scan(&id, &user_id, &group_id, &task_name, &task_type, &description, &cron_spec, &run_file_folder,
 		&old_zip_file, &concurrent, &command, &status, &notify, &notify_email, &timeout, &execute_times,
-		&prev_time, &create_time, &version, &zip_file_path); er != nil {
+		&prev_time, &create_time, &version, &zip_file_path, &worker_id); er != nil {
 
 		return nil, er
 		fmt.Printf("GetTaskById has wrong : %s", er)
@@ -40,6 +40,7 @@ func (this *DataStorage) GetTaskById(idinput int) (*model.TaskExend, error) {
 			TimeOut			: timeout,
 			Version			: version,
 			ZipFilePath		: zip_file_path,
+			WorkerId        : worker_id,
 		},
 		UserId		: user_id,
 		GroupId		: group_id,
@@ -68,10 +69,10 @@ func (this *DataStorage) UpdateFrontTask(task *model.TaskExend) error {
 	if _, err := this.db.Exec(
 		`update task set group_id = ?, task_name = ?, task_type = ?, description = ?, cron_spec = ?,
 				old_zip_file = ?, concurrent = ?, command = ?, notify = ?, notify_email = ?, timeout = ?,
-				version = ?, zip_file_path = ?, run_file_folder = ?  where id = ?`,
+				version = ?, zip_file_path = ?, run_file_folder = ?, worker_id = ?  where id = ?`,
 		task.GroupId, task.Name, task.TaskType, task.Description, task.CronSpec,
 		task.OldZipFile, task.Concurrent, task.Command, task.Notify, task.NotifyEmail, task.TimeOut,
-		task.Version, task.ZipFilePath, task.RunFilefolder, task.Id); err != nil {
+		task.Version, task.ZipFilePath, task.RunFilefolder, task.WorkerId, task.Id); err != nil {
 			return err
 	}
 	return nil
@@ -81,11 +82,11 @@ func (this *DataStorage) TaskAdd(task *model.TaskExend) (error) {
 	if _, err := this.db.Exec(
 		`INSERT into task(user_id, group_id, task_name, task_type, description, cron_spec, run_file_folder,
 								old_zip_file, concurrent, command, status, notify, notify_email, timeout, execute_times,
-							    prev_time, create_time, version, delete, zip_file_path)
-				VALUES(?,?,?,?,?,?,?,  ?,?,?,0,?,?,?,0,  ?,?,?,1,?)`,
+							    prev_time, create_time, version, delete, zip_file_path, worker_id)
+				VALUES(?,?,?,?,?,?,?,  ?,?,?,0,?,?,?,0,  ?,?,?,1,?,?)`,
 		task.UserId, task.GroupId, task.Name, task.TaskType, task.Description, task.CronSpec, task.RunFilefolder,
 		task.OldZipFile, task.Concurrent, task.Command, task.Notify, task.NotifyEmail, task.TimeOut,
-		task.PrevTime,task.CreateTime,task.Version, task.ZipFilePath); err != nil {
+		task.PrevTime,task.CreateTime,task.Version, task.ZipFilePath, task.WorkerId); err != nil {
 			return err
 	}
 

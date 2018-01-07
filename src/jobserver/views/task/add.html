@@ -133,6 +133,17 @@
 						</select>
 					</div>				
 				</div>
+
+                <div class="control-group">
+                    <label class="control-label" for="group_worker">worker</label>
+                    <div class="controls">
+                        <select id="group_worker">
+						{{range $k, $v := .workers}}
+                            <option value="{{$v.Id}}">{{$v.Name}}</option>
+						{{end}}
+                        </select>
+                    </div>
+                </div>
 				
 				<div class="control-group">											
 					<label class="control-label">是否只允许一个实例</label>
@@ -231,6 +242,7 @@
 <script type="text/javascript">
 $(function () {
 	$("#group_id").val({{$.task.GroupId}});
+	$("#group_worker").val({{$.task.WorkerId}})
 	
 	var typeName = 'no';
 	if ({{.task.Concurrent}} == undefined || {{.task.Concurrent}} == 0)
@@ -288,6 +300,7 @@ $(function () {
             data: {
 				"id": {{.task.Id}},
                 "group_id": $("#group_id").val(),
+				"worker_id": $("#group_worker").val(),
                 "task_name": $("#task_name").val(),
                 "description": $("#description").val(),
                 "concurrent": $(".concurrent input:checked").val(),

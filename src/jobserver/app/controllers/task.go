@@ -134,7 +134,10 @@ func (this *TaskController) UploadRunFile() {
 // 添加任务
 func (this *TaskController) Add() {
 	groups, _ := dataaccess.TaskGroupGetList(1, 100)
+	workers,_ := dataaccess.GetWorkerList(1)
+
 	this.Data["groups"] = groups
+	this.Data["workers"] = workers
 	this.Data["pageTitle"] = "添加任务"
 	this.display()
 }
@@ -150,9 +153,13 @@ func (this *TaskController) Edit() {
 
 	// 分组列表
 	groups, _ := dataaccess.TaskGroupGetList(1, 100)
+	workers,_ := dataaccess.GetWorkerList(1)
+
 	this.Data["groups"] = groups
+	this.Data["workers"] = workers
 	this.Data["task"] = task
 	this.Data["pageTitle"] = "编辑任务"
+
 	this.display("task/add")
 }
 
@@ -183,6 +190,7 @@ func (this *TaskController) SaveTask() {
 	task.Command = strings.TrimSpace(this.GetString("command"))
 	task.Notify, _ = this.GetInt("notify")
 	task.TimeOut, _ = this.GetInt("timeout")
+	task.WorkerId,_ =  this.GetInt("worker_id")
 
 	isUploadNewFile := false
 	if task.OldZipFile != strings.TrimSpace(this.GetString("oldzipfile")) {

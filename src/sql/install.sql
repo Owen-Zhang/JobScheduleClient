@@ -30,7 +30,8 @@ CREATE TABLE `task` (
   `create_time` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '创建时间',
   `version` int(11) unsigned NOT NULL DEFAULT 0 COMMENT '版本号',
   `zip_file_path` VARCHAR(300) NOT NULL DEFAULT '' COMMENT 'zip获取地址',
-  `deleted` int(11) unsigned NOT NULL DEFAULT  0 COMMENT '是否删除,1表示删除,0表示正常'
+  `deleted` int(11) unsigned NOT NULL DEFAULT  0 COMMENT '是否删除,1表示删除,0表示正常',
+  `worker_id` int(11) NOT NULL DEFAULT '0' COMMENT '客户端编号',
   PRIMARY KEY (`id`),
   KEY `idx_user_id` (`user_id`),
   KEY `idx_group_id` (`group_id`)

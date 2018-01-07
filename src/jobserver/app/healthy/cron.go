@@ -22,7 +22,7 @@ func init()  {
 //加载worker，监控worker
 func InitHealthCheck(spec string, access *storage.DataStorage) {
 	dataaccess = access
-	list, err := dataaccess.GetWorkerList()
+	list, err := dataaccess.GetWorkerList(1)
 	if err != nil || list == nil || len(list) == 0 {
 		return
 	}

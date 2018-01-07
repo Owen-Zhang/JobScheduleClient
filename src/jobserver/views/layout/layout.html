@@ -81,6 +81,12 @@
 						<span>任务管理</span>
 					</a>    				
 				</li>
+                <li {{if eq .curController "worker"}}class="active"{{end}}>
+                    <a href="/worker/list">
+                        <i class="icon-folder-close"></i>
+                        <span>worker管理</span>
+                    </a>
+                </li>
 				<li {{if eq .curController "group"}}class="active"{{end}}>					
 					<a href="/group/list">
 						<i class="icon-folder-close"></i>
