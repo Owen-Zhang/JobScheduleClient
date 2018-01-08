@@ -9,10 +9,11 @@ import (
 	"model"
 	"encoding/json"
 	"bytes"
-	"path/filepath"
-	"time"
-	"log"
-	"os/exec"
+	//"path/filepath"
+	//"time"
+	//"log"
+	//"os/exec"
+	"utils/log"
 )
 
 func main()  {
@@ -23,11 +24,14 @@ func main()  {
 		}
 	}()
 	
+	testLog()
+	
 	
 	//loggerManager()
 	
 	//watchFile()
 
+	/*
 	os.Mkdir("Temp", 0777)
 
 	file1, err1 := os.Create("Temp/1.txt")
@@ -44,10 +48,16 @@ func main()  {
 	}
 	path := filepath.Dir(file)
 	fmt.Println(path)
+	*/
 
 	for ; ;  {
 		
 	}
+}
+
+func testLog() {
+	log.Errorf("test log..\nsdfasdfasdfasd")
+	log.Errorf("111111")
 }
 
 /*
@@ -62,6 +72,7 @@ func watchFile() {
 }
 */
 
+/*
 //记录日志(此方法不可取)
 func loggerManager() {
 	fileName := fmt.Sprintf("%s.txt", time.Now().Format("2006-01-02"))
@@ -76,6 +87,7 @@ func loggerManager() {
 	logIn.Println("test \n")
 	logIn.Fatalln("fatal\n")
 }
+*/
 
 //上传文件测试
 func uploadFile() {
