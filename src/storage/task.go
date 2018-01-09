@@ -79,11 +79,12 @@ func (this *DataStorage) UpdateFrontTask(task *model.TaskExend) error {
 }
 
 func (this *DataStorage) TaskAdd(task *model.TaskExend) (error) {
+	fmt.Println(*task)
 	if _, err := this.db.Exec(
 		`INSERT into task(user_id, group_id, task_name, task_type, description, cron_spec, run_file_folder,
 								old_zip_file, concurrent, command, status, notify, notify_email, timeout, execute_times,
-							    prev_time, create_time, version, delete, zip_file_path, worker_id)
-				VALUES(?,?,?,?,?,?,?,  ?,?,?,0,?,?,?,0,  ?,?,?,1,?,?)`,
+							    prev_time, create_time, version, deleted, zip_file_path, worker_id)
+				VALUES(?,?,?,?,?,?,?,  ?,?,?,0,?,?,?,0,  ?,?,?,0,?,?)`,
 		task.UserId, task.GroupId, task.Name, task.TaskType, task.Description, task.CronSpec, task.RunFilefolder,
 		task.OldZipFile, task.Concurrent, task.Command, task.Notify, task.NotifyEmail, task.TimeOut,
 		task.PrevTime,task.CreateTime,task.Version, task.ZipFilePath, task.WorkerId); err != nil {

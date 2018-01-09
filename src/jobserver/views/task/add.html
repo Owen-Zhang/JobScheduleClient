@@ -93,6 +93,10 @@
 .clearfix {
 	*zoom:1;
 }
+.notegreen {
+	color : green;
+}
+
 </style>
 <div class="row">
 <div class="span12">
@@ -113,7 +117,8 @@
 					<label class="control-label" for="task_name">任务名称</label>
 					<div class="controls">
 						<input type="text" value="{{.task.Name}}" class="span6" id="task_name">
-					</div>				
+					</div>		
+					<div class="controls icon-"></div>		
 				</div>
 								
 				<div class="control-group">											
@@ -145,6 +150,17 @@
                     </div>
                 </div>
 				
+				<div class="control-group">
+                    <label class="control-label" for="task_type">任务类型</label>
+                    <div class="controls">
+                        <select id="task_type">
+                            <option value="0">命令</option>
+							<option value="1">文件</option>
+							<option value="2">接口</option>
+                        </select>
+                    </div>
+                </div>
+				
 				<div class="control-group">											
 					<label class="control-label">是否只允许一个实例</label>
 					<div class="controls concurrent">
@@ -153,8 +169,8 @@
 						</label>
 						<label class="radio inline">
 							<input type="radio" value="1" name="no"> 否
-						</label>
-						<p class="help-block">设为“是”的话，如果该任务在上一个时间点还没执行完，则略过不执行</p>
+						</label> 
+						<i class="icon-question-sign notegreen" title="设为“是”的话，如果该任务在上一个时间点还没执行完，则略过不执行"></i>
 					</div>
 				</div>
 				
@@ -165,15 +181,33 @@
 						<a href="{{urlfor "HelpController.Index"}}" target="_blank">参见使用帮助</a>
 					</div>
 				</div>
+				
+				<div class="control-group task_url_div">											
+					<label class="control-label" for="task_url">接口地址</label>
+					<div class="controls">
+						<input type="text" value="{{.task.TaskApiUrl}}" class="span6" id="task_url">
+						<i class="icon-question-sign notegreen" title="如：http://127.0.0.1:2000/abs"></i>
+					</div>				
+				</div>
+				
+				<div class="control-group task_url_method_div">
+                    <label class="control-label" for="task_method">提交方式</label>
+                    <div class="controls">
+                        <select id="task_method">
+                            <option value="POST">POST</option>
+							<option value="GET">GET</option>
+                        </select>
+                    </div>
+                </div>
 
-				<div class="control-group">											
-					<label class="control-label" for="command">命令脚本</label>
+				<div class="control-group command-div">											
+					<label class="control-label" for="command">脚本</label>
 					<div class="controls">
 						<textarea class="span6" id="command" rows="6">{{.task.Command}}</textarea>
 					</div>
-				</div>
+				</div>											
 
-				<div class="control-group">
+				<div class="control-group upload-div">
 					<label style="line-height:40px" class="control-label">程序文件</label>
 					<div class="controls">
 						<div class="upload clearfix">
@@ -193,10 +227,10 @@
 				</div>
 				
 				<div class="control-group">											
-					<label class="control-label" for="timeout">超时设置</label>
+					<label class="control-label" for="timeout">超时设置(秒)</label>
 					<div class="controls">
-						<input type="text"  class="span1" id="timeout" value="{{.task.TimeOut}}"> 秒
-						<span class="help-block">不设置的话，默认超时时间为1天</span>
+						<input type="text"  class="span1" id="timeout" value="{{.task.TimeOut}}">
+						<i class="icon-question-sign notegreen" title="不设置的话，默认超时时间为1天"></i>
 					</div>
 				</div>
 				
@@ -244,14 +278,22 @@ $(function () {
 	$("#group_id").val({{$.task.GroupId}});
 	$("#group_worker").val({{$.task.WorkerId}})
 	
+	var taskType = {{$.task.TaskType}}
+	$("#task_type").val(taskType)
+	if (taskType == 0){ //命令
+		$(".task_url_div, .task_url_method_div, .upload-div").hide();
+	} else if (taskType == 1) { //文件
+		$(".task_url_div, .task_url_method_div").hide();
+	} else { //接口
+		$(".upload-div").hide();
+	}
+	
 	var typeName = 'no';
 	if ({{.task.Concurrent}} == undefined || {{.task.Concurrent}} == 0)
-		typeName = 'yes';				
+		typeName = 'yes';			
+			
 	$("input:radio[name='" + typeName + "']").attr("checked",'checked');
-	
-	if ({{$.task.OldZipFile}} && {{$.task.OldZipFile}} != "") {
-		$(".filestate").show().text({{$.task.OldZipFile}});
-	}
+	$(".filestate").show().text({{$.task.OldZipFile}});
 	
 	var notifyName = 'NotNotify';
 	var notifyValue = {{.task.Notify}};
@@ -299,6 +341,7 @@ $(function () {
             async: true,
             data: {
 				"id": {{.task.Id}},
+				"task_type": $("#task_type").val(),
                 "group_id": $("#group_id").val(),
 				"worker_id": $("#group_worker").val(),
                 "task_name": $("#task_name").val(),
@@ -310,7 +353,9 @@ $(function () {
                 "timeout": $("#timeout").val(),
                 "notify_email": $("#notify_email").val(),
                 "runfilename": $("#uploadFile").attr("data-file") == undefined ? "" : $("#uploadFile").attr("data-file"),
-				"oldzipfile": $.trim($(".filestate").text())
+				"oldzipfile": $.trim($(".filestate").text()),
+				"task_url":$.trim($("#task_url").val()),
+				"task_method": $("#task_method").val()
 			},
             success: function (result) {
                 if (result.IsSuccess) {
@@ -340,8 +385,22 @@ $(function () {
 			$('.notify_email').addClass('hide');
 		}
 	});
+	
+	$("#task_type").change(function(){
+		var val = $(this).val()
+		if (val == 0){ //命令
+			$(".task_url_div, .task_url_method_div, .upload-div").hide();
+		} else if (val == 1) { //文件
+			$(".upload-div").show();
+			$(".task_url_div, .task_url_method_div").hide();
+		} else { //接口
+			$(".task_url_div, .task_url_method_div").show();
+			$(".upload-div").hide()
+		}
+	})
 });
 
+/*
 //构造要保存的数据
 function ConstructSubmitData() {
 	var data = {
@@ -357,6 +416,7 @@ function ConstructSubmitData() {
 		runfilename: $("#uploadFile").attr("data-file") == undefined ? "" : $("#uploadFile").attr("data-file")
 	};
 }
+*/
 
 function CheckFile(obj) {
 	var array = new Array('zip');  //可以上传的文件类型

@@ -20,6 +20,8 @@ CREATE TABLE `task` (
   `run_file_folder` varchar(200) NOT NULL DEFAULT '' COMMENT '运行程序的文件夹信息',
   `old_zip_file` varchar(200) NOT NULL DEFAULT '' COMMENT '当前运行程序的上传zip包名称',
   `concurrent` tinyint(4) NOT NULL DEFAULT '0' COMMENT '是否只允许一个实例',
+  `apiurl` varchar(200) NOT NULL DEFAULT '' COMMENT 'API调用的url: http://www.baidu.com/abc',
+  `apimethod` varchar(10) NOT NULL DEFAULT '' COMMENT 'API调用的Method:post,get',
   `command` text NOT NULL COMMENT '命令详情',
   `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0停用 1启用',
   `notify` tinyint(4) NOT NULL DEFAULT '0' COMMENT '通知设置',
@@ -75,4 +77,4 @@ CREATE TABLE `user` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 INSERT INTO `user` (`id`, `user_name`, `email`, `password`, `salt`, `last_login`, `last_ip`, `status`)
-VALUES (1,'admin','admin@example.com','13355ecfa8973ec8eb85133ebd84179b','',0,'',0);
+VALUES (1,'admin','admin@example.com','e10adc3949ba59abbe56e057f20f883e','',0,'',0);

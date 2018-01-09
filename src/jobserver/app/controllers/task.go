@@ -182,6 +182,7 @@ func (this *TaskController) SaveTask() {
 		task.UserId = this.userId
 	}
 
+	task.TaskType, _ = this.GetInt("task_type") //save
 	task.Name = strings.TrimSpace(this.GetString("task_name"))
 	task.Description = strings.TrimSpace(this.GetString("description"))
 	task.GroupId, _ = this.GetInt("group_id")
@@ -191,15 +192,15 @@ func (this *TaskController) SaveTask() {
 	task.Notify, _ = this.GetInt("notify")
 	task.TimeOut, _ = this.GetInt("timeout")
 	task.WorkerId,_ =  this.GetInt("worker_id")
-
+	task.TaskApiMethod = strings.TrimSpace(this.GetString("task_method"))//save
+	task.TaskApiUrl = strings.TrimSpace(this.GetString("task_url"))//save
+	useruploadfile := strings.TrimSpace(this.GetString("oldzipfile"))
+	
 	isUploadNewFile := false
-	if task.OldZipFile != strings.TrimSpace(this.GetString("oldzipfile")) {
+	if task.TaskType == 1 && task.OldZipFile != useruploadfile {
 		isUploadNewFile = true
-		task.OldZipFile = strings.TrimSpace(this.GetString("oldzipfile"))
+		task.OldZipFile = useruploadfile
 	}
-
-	/*runFileName: 记录处理过的文件名(为了保存文件名不重复，重新取文件名); OldZipFile: 用户上传的文件*/
-	runFileName := strings.TrimSpace(this.GetString("runfilename"))
 	notifyEmail := strings.TrimSpace(this.GetString("notify_email"))
 
 	resultData := &response.ResultData{IsSuccess: false, Msg: ""}
@@ -218,17 +219,22 @@ func (this *TaskController) SaveTask() {
 		task.NotifyEmail = strings.Join(emailList, ";")
 	}
 
-	if task.Name == "" || task.CronSpec == "" || task.Command == "" {
+	if task.Name == "" || task.CronSpec == "" || 
+		((task.TaskType == 0 || task.TaskType == 1) && task.Command == "") || 
+		(task.TaskType == 2 && (task.TaskApiUrl = "" || task.TaskApiMethod = ""))  {
 		resultData.Msg = "请填写完整信息"
 		this.jsonResult(resultData)
 	}
+	
 	if _, err := cron.Parse(task.CronSpec); err != nil {
 		resultData.Msg = "cron表达式无效"
 		this.jsonResult(resultData)
 	}
 
-	//此处要去掉，上传文件到文件服务器
-	if isUploadNewFile && task.OldZipFile != "" {
+	if task.TaskType == 1 && isUploadNewFile && task.OldZipFile != "" {
+		
+		/*runFileName: 记录处理过的文件名(为了保存文件名不重复，重新取文件名); OldZipFile: 用户上传的文件名*/
+		runFileName := strings.TrimSpace(this.GetString("runfilename"))
 
 		filepath := tempFileFolder + "/" +  runFileName
 		//上传文件到文件服务器

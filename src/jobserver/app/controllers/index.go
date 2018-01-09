@@ -8,6 +8,8 @@ import (
 	"github.com/astaxie/beego/utils"
 	"strings"
 	"jobserver/app/libs"
+	
+	"fmt"
 )
 
 type MainController struct {
@@ -132,6 +134,7 @@ func (this *MainController) Login() {
 			user, err := dataaccess.UserGetByName(username)
 			errorMsg := ""
 			if err != nil || user.Password != libs.Md5([]byte(password+user.Salt)) {
+				fmt.Println(err)
 				errorMsg = "帐号或密码错误"
 			} else if user.Status == -1 {
 				errorMsg = "该帐号已禁用"
