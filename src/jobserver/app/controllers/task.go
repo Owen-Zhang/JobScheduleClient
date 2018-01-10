@@ -32,6 +32,8 @@ func (this *TaskController) List() {
 		page = 1
 	}
 	groupId, _ := this.GetInt("groupid")
+	workerid, _ := this.GetInt("workerid")
+	
 	result, count := dataaccess.TaskGetList(page, this.pageSize, -1, groupId)
 
 	list := make([]map[string]interface{}, len(result))
@@ -71,12 +73,15 @@ func (this *TaskController) List() {
 
 	// 分组列表
 	groups, _ := dataaccess.TaskGroupGetList(1, 100)
+	workers, _:= dataaccess.GetWorkerList(1)
 
 	this.Data["pageTitle"] = "任务列表"
 	this.Data["list"] = list
 	this.Data["groups"] = groups
+	this.Data["workers"] = workers
 	this.Data["groupid"] = groupId
-	this.Data["pageBar"] = libs.NewPager(page, int(count), this.pageSize, beego.URLFor("TaskController.List", "groupid", groupId), true).ToString()
+	this.Data["workerid"] = workerid
+	this.Data["pageBar"] = libs.NewPager(page, int(count), this.pageSize, beego.URLFor("TaskController.List", "groupid", groupId, "workerid", workerid), true).ToString()
 	this.display()
 }
 
@@ -182,7 +187,10 @@ func (this *TaskController) SaveTask() {
 		task.UserId = this.userId
 	}
 
-	task.TaskType, _ = this.GetInt("task_type") //save
+	if isNew {
+		task.TaskType, _ = this.GetInt("task_type")
+	}
+		
 	task.Name = strings.TrimSpace(this.GetString("task_name"))
 	task.Description = strings.TrimSpace(this.GetString("description"))
 	task.GroupId, _ = this.GetInt("group_id")
@@ -192,8 +200,8 @@ func (this *TaskController) SaveTask() {
 	task.Notify, _ = this.GetInt("notify")
 	task.TimeOut, _ = this.GetInt("timeout")
 	task.WorkerId,_ =  this.GetInt("worker_id")
-	task.TaskApiMethod = strings.TrimSpace(this.GetString("task_method"))//save
-	task.TaskApiUrl = strings.TrimSpace(this.GetString("task_url"))//save
+	task.TaskApiMethod = strings.TrimSpace(this.GetString("task_method"))
+	task.TaskApiUrl = strings.TrimSpace(this.GetString("task_url"))
 	useruploadfile := strings.TrimSpace(this.GetString("oldzipfile"))
 	
 	isUploadNewFile := false
@@ -221,7 +229,7 @@ func (this *TaskController) SaveTask() {
 
 	if task.Name == "" || task.CronSpec == "" || 
 		((task.TaskType == 0 || task.TaskType == 1) && task.Command == "") || 
-		(task.TaskType == 2 && (task.TaskApiUrl = "" || task.TaskApiMethod = ""))  {
+		(task.TaskType == 2 && (task.TaskApiUrl == "" || task.TaskApiMethod == ""))  {
 		resultData.Msg = "请填写完整信息"
 		this.jsonResult(resultData)
 	}
@@ -395,9 +403,31 @@ func (this *TaskController) LogBatch() {
 
 // 启动任务
 func (this *TaskController) Start() {
-	//id, _ := this.GetInt("id")
+	result := &response.ResultData{
+		IsSuccess: false,
+		Msg:       "",
+	}
+	id, _ := this.GetInt("id")
+	
+	if id <= 0 {
+		result.Msg = "请操作正常的任务"
+		this.Data["json"] = result
+		this.ServeJSON()
+	}
 
+	/*
+	task, err := dataaccess.GetTaskById(id)
+	if err != nil {
+		result.Msg = err.Error()
+		this.Data["json"] = result
+		this.ServeJSON()
+	}
+	*/
+	
+	//是否要先改task状态
 	//jobworker运行相关的任务
+	//根据任务去找到worker相关的地址信息
+	//向worker机器发命令，启动某个任务
 
 	this.Data["json"] = &response.ResultData{
 		IsSuccess: true,
@@ -413,9 +443,32 @@ func (this *TaskController) Start() {
 
 // 暂停任务
 func (this *TaskController) Pause() {
-	//id, _ := this.GetInt("id")
+	result := &response.ResultData{
+		IsSuccess: false,
+		Msg:       "",
+	}	
+	
+	id, _ := this.GetInt("id")
+	if id <= 0 {
+		result.Msg = "请操作正常的任务"
+		this.Data["json"] = result
+		this.ServeJSON()
+	}
+	
+	/*
+	task, err := dataaccess.GetTaskById(id)
+	if err != nil {
+		result.Msg = err.Error()
+		this.Data["json"] = result
+		this.ServeJSON()
+	}
+	*/
+	
+	//根据任务去找到worker相关的地址信息
+	//2：让worker结束任务
 
 	//1：让worker结束任务,更改任务状态
+	dataaccess.TaskUpdateStatus(id, 0)
 
 	this.Data["json"] = &response.ResultData{
 		IsSuccess: true,
@@ -431,12 +484,35 @@ func (this *TaskController) Pause() {
 
 // 删除任务
 func (this *TaskController) Delete() {
-	//id, _ := this.GetInt("id")
-    //2：让worker结束任务,更改任务
-	this.Data["json"] = &response.ResultData{
-		IsSuccess: true,
+	result := &response.ResultData{
+		IsSuccess: false,
 		Msg:       "",
 		Data:      true,
+	}	
+	id, _ := this.GetInt("id")
+	if id <= 0 {
+		result.Msg = "请操作正常的任务"
+		this.Data["json"] = result
+		this.ServeJSON()
 	}
+	/*
+	task, err := dataaccess.GetTaskById(id)
+	if err != nil {
+		result.Msg = err.Error()
+		this.Data["json"] = result
+		this.ServeJSON()
+	}*/
+	
+	//根据任务去找到worker相关的地址信息
+	//2：让worker结束任务
+	
+	if err := dataaccess.TaskDel(id); err != nil {
+		result.Msg = err.Error()
+		this.Data["json"] = result
+		this.ServeJSON()
+	}
+	
+	result.IsSuccess = true
+	this.Data["json"] = result
 	this.ServeJSON()
 }

@@ -151,7 +151,9 @@ func (this *Controller) delete(id int) {
 	if jobs.ExistJob(id) {
 		jobs.RemoveJob(id)
 	}
+	/*
 	if err := this.Storage.DeleteTask(id); err != nil {
 		fmt.Printf("Delete Task has wrong: %s", err.Error())
 	}
+	*/
 }

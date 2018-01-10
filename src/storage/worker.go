@@ -49,7 +49,7 @@ func (this *DataStorage) DeleteWorker(id int) error  {
 	return  nil
 }
 
-//查询出所有的worker机器(status = 2表示全部)
+//查询出所有的worker机器(status = 2表示全部), 1表示正常，0表示不可用
 func (this *DataStorage) GetWorkerList(status int) ([]*model.HealthInfo, error) {
 	rows, err := this.db.Query("SELECT id, name, url, port, systeminfo, status from worker where (? = 2 or ? = status);", status, status)
 	if err != nil {

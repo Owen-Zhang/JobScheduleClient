@@ -13,7 +13,12 @@
 		
 		<p>
 		<h3>{{.task.Name}} （#{{.task.Id}}）</h3>
-
+		
+		{{if eq .task.TaskType 2}}
+		<pre>{{.task.TaskApiUrl}}</pre>
+		<pre>{{.task.TaskApiMethod}}</pre>
+		{{end}}
+		
 		<pre>{{.task.Command}}</pre>
 		</p>
 		<hr />

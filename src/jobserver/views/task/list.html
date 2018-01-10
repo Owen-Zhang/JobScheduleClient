@@ -30,6 +30,12 @@
 			
 			<div class="btn-group  btn-large" style="float:right">
 			<form method="post" name="s" action="{{urlfor "TaskController.List"}}">
+				<select name="workerid" class="btn-large" style="padding-top: 0px;">
+					<option value="0">全部Worker</option>
+					{{range $k, $v := .workers}}
+					<option value="{{$v.Id}}" {{if eq $v.Id $.workerid}}selected{{end}}>{{$v.Name}}</option>
+					{{end}}
+				</select>
 				<select name="groupid" class="btn-large" style="padding-top: 0px;">
 					<option value="0">全部分组</option>
 					{{range $k, $v := .groups}}
@@ -94,6 +100,10 @@ $(function() {
 	});
 
 	$("select[name='groupid']").change(function () {
+		$("form[name='s']").submit();
+	});
+	
+	$("select[name='workerid']").change(function () {
 		$("form[name='s']").submit();
 	});
 

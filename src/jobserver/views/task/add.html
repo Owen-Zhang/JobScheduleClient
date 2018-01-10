@@ -288,6 +288,10 @@ $(function () {
 		$(".upload-div").hide();
 	}
 	
+	if (taskType != 0) {
+		$("#task_type").attr('disabled', true);
+	}
+	
 	var typeName = 'no';
 	if ({{.task.Concurrent}} == undefined || {{.task.Concurrent}} == 0)
 		typeName = 'yes';			
