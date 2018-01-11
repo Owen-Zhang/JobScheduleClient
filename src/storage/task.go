@@ -3,6 +3,7 @@ package storage
 import (
 	"fmt"
 	"model"
+	"database/sql"
 )
 
 //根据id获取相关的任务信息
@@ -21,6 +22,10 @@ func (this *DataStorage) GetTaskById(idinput int) (*model.TaskExend, error) {
 		&old_zip_file, &concurrent, &apiurl, &apimethod, &command, &status, &notify, &notify_email, &timeout, &execute_times,
 		&prev_time, &create_time, &version, &zip_file_path, &worker_id); er != nil {
 
+		if er == sql.ErrNoRows {
+			return nil, nil
+		}
+		
 		return nil, er
 		fmt.Printf("GetTaskById has wrong : %s", er)
 	}

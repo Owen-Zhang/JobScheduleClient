@@ -77,7 +77,15 @@ func ExistJob(id int) bool  {
 	return false
 }
 
-/*
+// 運行任務中的job
+func RunJob(id int) {
+	entry := getEntryById(id)
+	if entry != nil {
+		entry.Job.Run()
+	}
+}
+
+// 查詢出cron的
 func getEntryById(id int) *cron.Entry {
 	entries := mainCron.Entries()
 	for _, e := range entries {
@@ -89,4 +97,4 @@ func getEntryById(id int) *cron.Entry {
 	}
 	return nil
 }
-*/
+

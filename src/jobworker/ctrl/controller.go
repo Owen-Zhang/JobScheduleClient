@@ -51,6 +51,8 @@ NEW_TICK_DURATION:
 				this.stop(newtask.Id)
 			case 4:
 				this.delete(newtask.Id)
+			case 5:
+				this.run(newtask.Id)
 			}
 
 			goto NEW_TICK_DURATION

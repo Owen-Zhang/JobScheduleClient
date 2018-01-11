@@ -34,7 +34,7 @@ func (this *WorkerController) SaveWork() {
 	worker.Port,_ = this.GetInt("worker_port", 0)
 	worker.Status = 1
 
-	_, errT := dataaccess.GetWorkerByName(worker.Name)
+	_, errT := dataaccess.GetOneWorker(worker.Name, 0)
 	if errT == nil {
 		this.ajaxMsg("已存在相同的worker名称", MSG_ERR)
 	}

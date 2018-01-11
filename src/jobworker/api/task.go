@@ -8,7 +8,7 @@ import (
 	"strconv"
 )
 
-//运行任务
+//加入任务
 func (this *ApiServer) starttask(c *gin.Context) {
 	response := &model.WorkerResponse{
 		Success: false,
@@ -25,6 +25,30 @@ func (this *ApiServer) starttask(c *gin.Context) {
 
 	this.controller.Actionlist <- ctrl.Action{
 		ActionType: 2,
+		Id:         id,
+	}
+
+	response.Success = true
+	c.JSON(http.StatusOK, response)
+}
+
+//運行任務
+func (this *ApiServer) runtask(c *gin.Context) {
+	response := &model.WorkerResponse{
+		Success: false,
+		Message: "",
+	}
+
+	idtemp := c.PostForm("id")
+	id, err :=strconv.Atoi(idtemp)
+	if err != nil || id <= 0 {
+		response.Message = "please input right task id"
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	this.controller.Actionlist <- ctrl.Action{
+		ActionType: 5,
 		Id:         id,
 	}
 

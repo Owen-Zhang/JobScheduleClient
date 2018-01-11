@@ -129,7 +129,7 @@ func (this *Controller) start(request *Action) {
 		command = fmt.Sprintf("%s\\Run\\%s", datapath, task.Command)
 	}
 
-	if !jobs.ExistJob(task.Id) {
+	if jobs.ExistJob(task.Id) {
 		jobs.RemoveJob(task.Id)
 	}
 
@@ -139,6 +139,11 @@ func (this *Controller) start(request *Action) {
 		CronSpec: task.CronSpec, //"0 */1 * * * ?",
 		Command:  command,
 	})
+}
+
+//馬上運行任務
+func (this *Controller) run(id int) {
+	jobs.RunJob(id)
 }
 
 //停止任务
@@ -151,9 +156,5 @@ func (this *Controller) delete(id int) {
 	if jobs.ExistJob(id) {
 		jobs.RemoveJob(id)
 	}
-	/*
-	if err := this.Storage.DeleteTask(id); err != nil {
-		fmt.Printf("Delete Task has wrong: %s", err.Error())
-	}
-	*/
+	//最好還要刪除文件夾相關的東西
 }

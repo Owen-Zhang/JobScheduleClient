@@ -4,6 +4,7 @@ import (
 	"model"
 	"fmt"
 	"errors"
+	"database/sql"
 )
 
 //新增worker
@@ -14,18 +15,25 @@ func (this *DataStorage) AddWorker(info *model.HealthInfo) error {
 	return err
 }
 
-// 根据名称查询单个worker
-func (this *DataStorage) GetWorkerByName(name string) (*model.HealthInfo, error) {
+// 根据名称查询单个worker(用名字或者id查詢worker)
+func (this *DataStorage) GetOneWorker(name string, id int) (*model.HealthInfo, error) {
+	if name == "" && id == 0 {
+		return nil, errors.New("one of name or id must has values")
+	}
+	
 	var nameT, url, systeminfo string
-	var id, port, status int
+	var idT, port, status int
 
-	row := this.db.QueryRow("SELECT id, name, url, port, systeminfo, status from worker where name = ?;", name)
-	if er := row.Scan(&id, &nameT, &url, &port, &systeminfo, &status); er != nil {
+	row := this.db.QueryRow("SELECT id, name, url, port, systeminfo, status from worker where (? = '' or name = ?) and (? = 0 or ? = id) limit 1;", name,name,id,id)
+	if er := row.Scan(&idT, &nameT, &url, &port, &systeminfo, &status); er != nil {
+		if er == sql.ErrNoRows {
+			return nil, nil
+		}
 		return nil, er
 	}
 
 	return &model.HealthInfo{
-		Id			: id,
+		Id			: idT,
 		Name		: nameT,
 		Url			: url,
 		Port		: port,

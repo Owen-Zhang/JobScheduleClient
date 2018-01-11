@@ -8,6 +8,7 @@ import (
 	"model"
 	"utils/system"
 	"fmt"
+	"net/http"
 
 	"jobserver/app/libs"
 	"github.com/astaxie/beego"
@@ -24,6 +25,7 @@ type TaskController struct {
 }
 
 const tempFileFolder  = "TempFile"
+const workerUrl = "%s:%d/worker/%s"
 
 // 任务列表
 func (this *TaskController) List() {
@@ -415,14 +417,38 @@ func (this *TaskController) Start() {
 		this.ServeJSON()
 	}
 
-	/*
 	task, err := dataaccess.GetTaskById(id)
 	if err != nil {
 		result.Msg = err.Error()
 		this.Data["json"] = result
 		this.ServeJSON()
 	}
-	*/
+	if task != nil {
+		worker, err := dataaccess.GetOneWorker("", task.WorkerId)
+		if err != nil {
+			result.Msg = err.Error()
+			this.Data["json"] = result
+			this.ServeJSON()
+		}
+		
+		if worker != nil {
+			posturl := fmt.Sprintf(workerUrl, worker.Url, worker.Port, "starttask")
+			fmt.Println(posturl)
+			
+			res, err :=
+			req.Post(posturl, req.Param{"id" : id})
+			
+			if err != nil || res.Response().StatusCode != http.StatusOK {
+				result.Msg = err.Error()
+				if err == nil {
+					result.Msg = "[Start]通知客戶端失敗"
+				}
+				this.Data["json"] = result
+				this.ServeJSON()
+			}
+		}
+	}
+	
 	
 	//是否要先改task状态
 	//jobworker运行相关的任务
@@ -455,21 +481,45 @@ func (this *TaskController) Pause() {
 		this.ServeJSON()
 	}
 	
-	/*
 	task, err := dataaccess.GetTaskById(id)
 	if err != nil {
 		result.Msg = err.Error()
 		this.Data["json"] = result
 		this.ServeJSON()
 	}
-	*/
 	
-	//根据任务去找到worker相关的地址信息
-	//2：让worker结束任务
-
-	//1：让worker结束任务,更改任务状态
-	dataaccess.TaskUpdateStatus(id, 0)
-
+	if task != nil {
+		worker, err := dataaccess.GetOneWorker("", task.WorkerId)
+		if err != nil {
+			result.Msg = err.Error()
+			this.Data["json"] = result
+			this.ServeJSON()
+		}
+		
+		if worker != nil {
+			posturl := fmt.Sprintf(workerUrl, worker.Url, worker.Port, "stoptask")
+			fmt.Println(posturl)
+			
+			res, err :=
+			req.Post(posturl, req.Param{"id" : id})
+			
+			if err != nil || res.Response().StatusCode != http.StatusOK {
+				result.Msg = err.Error()
+				if err == nil {
+					result.Msg = "[Stop]通知客戶端失敗"
+				}
+				this.Data["json"] = result
+				this.ServeJSON()
+			}
+			
+			if err := dataaccess.TaskUpdateStatus(id, 0); err != nil {
+				result.Msg = err.Error()
+				this.Data["json"] = result
+				this.ServeJSON()
+			}
+		}
+	}
+	
 	this.Data["json"] = &response.ResultData{
 		IsSuccess: true,
 		Msg:       "",
@@ -495,23 +545,46 @@ func (this *TaskController) Delete() {
 		this.Data["json"] = result
 		this.ServeJSON()
 	}
-	/*
+
 	task, err := dataaccess.GetTaskById(id)
 	if err != nil {
 		result.Msg = err.Error()
 		this.Data["json"] = result
 		this.ServeJSON()
-	}*/
-	
-	//根据任务去找到worker相关的地址信息
-	//2：让worker结束任务
-	
-	if err := dataaccess.TaskDel(id); err != nil {
-		result.Msg = err.Error()
-		this.Data["json"] = result
-		this.ServeJSON()
 	}
 	
+	if task != nil {
+		//根据任务去找到worker相关的地址信息
+		worker, err := dataaccess.GetOneWorker("", task.WorkerId)
+		if err != nil {
+			result.Msg = err.Error()
+			this.Data["json"] = result
+			this.ServeJSON()
+		}
+		if worker != nil {
+			posturl := fmt.Sprintf(workerUrl, worker.Url, worker.Port, "deletetask")
+			fmt.Println(posturl)
+			
+			res, err :=
+			req.Post(posturl, req.Param{"id" : id})
+			
+			if err != nil || res.Response().StatusCode != http.StatusOK {
+				result.Msg = err.Error()
+				if err == nil {
+					result.Msg = "[Delete]通知客戶端失敗"
+				}
+				this.Data["json"] = result
+				this.ServeJSON()
+			}
+			
+			if err := dataaccess.TaskDel(id); err != nil {
+				result.Msg = err.Error()
+				this.Data["json"] = result
+				this.ServeJSON()
+			}
+		}	
+	}
+		
 	result.IsSuccess = true
 	this.Data["json"] = result
 	this.ServeJSON()
