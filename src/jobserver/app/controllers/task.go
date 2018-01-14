@@ -170,7 +170,7 @@ func (this *TaskController) Edit() {
 	this.display("task/add")
 }
 
-//保存任务(要修改)
+//保存任务
 func (this *TaskController) SaveTask() {
 	id, _ := this.GetInt("id", 0)
 	isNew := true
@@ -434,6 +434,13 @@ func (this *TaskController) Start() {
 		if worker != nil {
 			posturl := fmt.Sprintf(workerUrl, worker.Url, worker.Port, "starttask")
 			fmt.Println(posturl)
+
+			updateerr := dataaccess.TaskUpdateStatus(id, 1)
+			if updateerr != nil {
+				result.Msg = updateerr.Error()
+				this.Data["json"] = result
+				this.ServeJSON()
+			}
 			
 			res, err :=
 			req.Post(posturl, req.Param{"id" : id})
@@ -443,23 +450,85 @@ func (this *TaskController) Start() {
 				if err == nil {
 					result.Msg = "[Start]通知客戶端失敗"
 				}
+
+				//将状态改回去
+				dataaccess.TaskUpdateStatus(id, 0)
+
 				this.Data["json"] = result
 				this.ServeJSON()
 			}
 		}
 	}
-	
-	
-	//是否要先改task状态
-	//jobworker运行相关的任务
-	//根据任务去找到worker相关的地址信息
-	//向worker机器发命令，启动某个任务
 
 	this.Data["json"] = &response.ResultData{
 		IsSuccess: true,
 		Msg:       "",
 		Data: &response.JobInfo{
 			Status: 1,
+			Prev:   "-",
+			Next:   "-",
+		},
+	}
+	this.ServeJSON()
+}
+
+// 直接运行任务
+func (this *TaskController) Run()  {
+	result := &response.ResultData{
+		IsSuccess: false,
+		Msg:       "",
+	}
+
+	id, _ := this.GetInt("id")
+	if id <= 0 {
+		result.Msg = "请操作正常的任务"
+		this.Data["json"] = result
+		this.ServeJSON()
+	}
+
+	task, err := dataaccess.GetTaskById(id)
+	if err != nil {
+		result.Msg = err.Error()
+		this.Data["json"] = result
+		this.ServeJSON()
+	}
+
+	//这里可以分成两个动作，先start再run，后台统一去作处理
+	if task.Status != 1 {
+		result.Msg = "请先开始任务再运行"
+		this.Data["json"] = result
+		this.ServeJSON()
+	}
+
+	if task != nil {
+		worker, err := dataaccess.GetOneWorker("", task.WorkerId)
+		if err != nil {
+			result.Msg = err.Error()
+			this.Data["json"] = result
+			this.ServeJSON()
+		}
+
+		if worker != nil {
+			posturl := fmt.Sprintf(workerUrl, worker.Url, worker.Port, "stoptask")
+			fmt.Println(posturl)
+
+			res, err := req.Post(posturl, req.Param{"id": id})
+			if err != nil || res.Response().StatusCode != http.StatusOK {
+				result.Msg = err.Error()
+				if err == nil {
+					result.Msg = "[Stop]通知客戶端失敗"
+				}
+				this.Data["json"] = result
+				this.ServeJSON()
+			}
+		}
+	}
+
+	this.Data["json"] = &response.ResultData{
+		IsSuccess: true,
+		Msg:       "",
+		Data: &response.JobInfo{
+			Status: 0,
 			Prev:   "-",
 			Next:   "-",
 		},

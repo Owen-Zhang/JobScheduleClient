@@ -12,6 +12,8 @@ import (
 	"net/http"
 	"regexp"
 	"io"
+	"encoding/json"
+	"path"
 )
 
 //运行任务(包括新增和重新启动)
@@ -30,9 +32,41 @@ func (this *Controller) start(request *Action) {
 	command := task.Command
 
 	if task.TaskType == 1 {
-		//运行上传的文件
+		//生成文件夹(根文件夹,里面放有config文件和run文件夹)，run 放上传文件的解压内容
 		taskfolder := strings.TrimSpace(task.RunFilefolder)
-		datapath := fmt.Sprintf("%s\\%s\\%s\\", this.ExeConfig.ClientPath, this.ExeConfig.TaskFolder, taskfolder)
+		datapath := fmt.Sprintf(`Data/%s`, taskfolder)
+
+		//1: 检查上传文件是否有更新,如果没有更新就不用下载,没有配制文件也表示有更新
+		configfile := fmt.Sprintf(`%s/config.txt`, datapath)
+		if system.FileExist(configfile) {
+			bytes, err := ioutil.ReadFile(configfile)
+			if err != nil {
+				fmt.Printf("read config file err: %s", err.Error())
+				return
+			}
+			config := model.WorkerFileConfig{}
+			errconfig := json.Unmarshal(bytes, &config)
+
+			//反序列化有错就表示要重新下载文件及更新相应的配制信息
+			if errconfig != nil {
+				this.getFileAndUpdateConfig()
+			}
+
+			//客户端版本比服务器低并且上传的zip文件名不同时，需要更新文件以及更新配制
+			zipFileName := path.Base(task.ZipFilePath)
+			if config.Version < task.Version && config.FileName != zipFileName {
+				this.getFileAndUpdateConfig()
+			}
+
+		} else {
+			//新建文件夹，下载文件，新增配制信息
+			this.getFileAndUpdateConfig()
+		}
+
+		//2: 生成相应的文件夹目录
+
+		//3: 回写配制文件
+
 		if !system.FileExist(datapath) {
 			//数据文件夹没有，需要创建相关的文件夹
 			if err := os.MkdirAll(datapath, 0777); err != nil {
@@ -41,7 +75,7 @@ func (this *Controller) start(request *Action) {
 			}
 		}
 
-		configfile := fmt.Sprintf("%s\\config.txt", datapath)
+		//configfile := fmt.Sprintf("%s\\config.txt", datapath)
 		if !system.FileExist(configfile) {
 			file, err := os.Create(configfile)
 			if err != nil {
@@ -157,4 +191,9 @@ func (this *Controller) delete(id int) {
 		jobs.RemoveJob(id)
 	}
 	//最好還要刪除文件夾相關的東西
+}
+
+//下载文件，更新配制
+func (this *Controller) getFileAndUpdateConfig()  {
+	
 }

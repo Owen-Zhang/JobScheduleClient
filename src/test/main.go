@@ -14,6 +14,8 @@ import (
 	//"log"
 	//"os/exec"
 	"utils/log"
+	"utils/system"
+	"path"
 )
 
 func main()  {
@@ -23,10 +25,12 @@ func main()  {
 			fmt.Println(err)
 		}
 	}()
-	
-	testLog()
-	
-	
+
+	testFile()
+
+	testCreateFolder()
+
+	//testLog()
 	//loggerManager()
 	
 	//watchFile()
@@ -52,6 +56,24 @@ func main()  {
 
 	for ; ;  {
 		
+	}
+}
+
+func testFile()  {
+	fileName := path.Base(`job/e15f0794-a87b-4836-8227-0676aeea38bd.zip`)
+	fmt.Println(fileName)
+}
+
+func testCreateFolder()  {
+
+	if !system.FileExist("147258369/789456123") {
+		//数据文件夹没有，需要创建相关的文件夹
+		if err := os.MkdirAll("147258369/789456123", 0777); err != nil {
+			fmt.Printf("create run fileFolder err : %s", err.Error())
+			return
+		}
+	} else {
+		fmt.Println("文件夹存在")
 	}
 }
 

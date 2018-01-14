@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"github.com/axgle/mahonia"
+	"github.com/imroc/req"
+	"io/ioutil"
 )
 
 type Job struct {
@@ -21,32 +23,66 @@ type Job struct {
 
 //通过任务去创建cron job(此处要区分运行文件(要指定路径)和一些指令)
 func newJobFromTask(task *model.Task) (*Job, error) {
-	job := newCommandJob(task.Id, task.Name, task.Command)
+	job := newCommandJob(task)
 	job.task = task
 	job.concurrent = task.Concurrent == 1
 
 	return job, nil
 }
 
-func newCommandJob(id int, name string, command string) *Job {
+func newCommandJob(task *model.Task) *Job {
 	job := &Job{
-		id:   id,
-		name: name,
+		id:   task.Id,
+		name: task.Name,
 	}
-	job.runFunc = func(timeout time.Duration) (string, string, error, bool) {
-		bufOut := new(bytes.Buffer)
-		bufErr := new(bytes.Buffer)
 
-		cmd := exec.Command("cmd.exe", "/c", command)
-		cmd.Stdout = bufOut
-		cmd.Stderr = bufErr
-		cmd.Start() //另外开一个cmd程序去运行任务
+	//处理文件和命令型
+	if task.TaskType == 0 || task.TaskType == 1 {
+		job.runFunc = func(timeout time.Duration) (string, string, error, bool) {
+			bufOut := new(bytes.Buffer)
+			bufErr := new(bytes.Buffer)
 
-		err, isTimeout := runCmdWithTimeOut(cmd, timeout)
-		encoder := mahonia.NewDecoder("gbk")
+			cmd := exec.Command("cmd.exe", "/c", task.Command)
+			cmd.Stdout = bufOut
+			cmd.Stderr = bufErr
+			cmd.Start() //另外开一个cmd程序去运行任务
 
-		return encoder.ConvertString(bufOut.String()), encoder.ConvertString(bufErr.String()), err, isTimeout
+			err, isTimeout := runCmdWithTimeOut(cmd, timeout)
+			encoder := mahonia.NewDecoder("gbk")
+
+			return encoder.ConvertString(bufOut.String()), encoder.ConvertString(bufErr.String()), err, isTimeout
+		}
+	} else { //处理接口类型
+		job.runFunc = func(duration time.Duration) (string, string, error, bool) {
+			if task.TaskApiMethod == "POST" {
+				header := req.Header{
+					"Content-Type": "application/json",
+				}
+				responsestr := ""
+				res, err := req.Post(task.TaskApiUrl, header, req.BodyJSON(task.Command))
+				if err == nil {
+					bodystr, _ := ioutil.ReadAll(res.Response().Body)
+					defer res.Response().Body.Close()
+
+					responsestr = string(bodystr)
+				}
+				encoder := mahonia.NewDecoder("gbk")
+				return encoder.ConvertString(responsestr), "", err, false
+			} else {
+				responsestr := ""
+				res, err := req.Get(task.TaskApiUrl)
+				if err == nil {
+					bodystr, _ := ioutil.ReadAll(res.Response().Body)
+					defer res.Response().Body.Close()
+
+					responsestr = string(bodystr)
+				}
+				encoder := mahonia.NewDecoder("gbk")
+				return encoder.ConvertString(responsestr), "", err, false
+			}
+		}
 	}
+
 	return job
 }
 
@@ -86,9 +122,6 @@ func (this *Job) Run() {
 
 	cmdOut, cmdErr, err, isTimeout := this.runFunc(timeout)
 	ut := time.Now().Sub(t) / time.Millisecond
-
-	//fmt.Printf("cmdOut:%s; cmdErr: %s; err:%s; isTimeout: %t; \n", cmdOut, cmdErr, err, isTimeout)
-	//fmt.Println(ut)
 
 	//更新任务执行时间等
 	if err := data.UpdateBackTask(t.Unix(),this.task.Id); err != nil {
