@@ -8,6 +8,8 @@ import (
 )
 
 
+// updateFileInfo这个要处理，文件下载地址不对
+
 func main() {
 
 	defer func() {

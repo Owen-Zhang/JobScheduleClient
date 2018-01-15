@@ -28,7 +28,7 @@ func main()  {
 
 	testFile()
 
-	testCreateFolder()
+	//testCreateFolder()
 
 	//testLog()
 	//loggerManager()

@@ -1,6 +1,6 @@
 package model
 
 type WorkerFileConfig struct {
-	Version  int
-	FileName string
+	Version  int    `json:"version"`
+	FileName string `json:"filename"`
 }
