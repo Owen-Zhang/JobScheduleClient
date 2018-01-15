@@ -31,11 +31,11 @@ func NewWorker() (*JobWork, error) {
 		return nil, err
 	}
 
-	execonfig := etc.GetExeConfig()
-	if execonfig == nil {
-		return nil, errors.New("get execonfig is wrong")
+	fileserverinfo := etc.GetFileServerInfo()
+	if fileserverinfo == nil {
+		return nil, errors.New("get FileServerInfo is wrong")
 	}
-	controller := ctrl.NewController(dataaccess, execonfig)
+	controller := ctrl.NewController(dataaccess, fileserverinfo)
 	apiserver := api.NewAPiServer(etc.GetApiServerArg(), controller)
 	jobs.NewCron(etc.GetCronArg(), dataaccess)
 

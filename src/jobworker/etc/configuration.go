@@ -8,7 +8,7 @@ import (
 	"jobworker/api"
 	"os"
 	"jobworker/jobs"
-	"jobworker/ctrl"
+	"model"
 )
 
 type Configuration struct {
@@ -27,12 +27,12 @@ type Configuration struct {
 	CronService struct {
 		PoolSize int32 `yaml:"poolsize,omitempty"`
 	} `yaml:"cron,omitempty"`
-
-	ExeConfig struct {
-		ClientPath string `yaml:"clientpath,omitempty"`
-		TempZipFolder string `yaml:"tempzipfolder,omitempty"`
-		TaskFolder string `yaml:"taskfolder,omitempty"`
-	} `yaml:"exeinfo,omitempty"`
+	
+	FileServer struct {
+		Hosts   string `yaml:"hosts,omitempty"`
+		Port 	int    `yaml:"port,omitempty"`
+	} `yaml:"fileserver,omitempty"`
+	
 }
 
 var configuration *Configuration
@@ -86,15 +86,13 @@ func makeDefault() *Configuration {
 		}{
 			PoolSize: 10,
 		},
-
-		ExeConfig : struct {
-			ClientPath string `yaml:"clientpath,omitempty"`
-			TempZipFolder string `yaml:"tempzipfolder,omitempty"`
-			TaskFolder string `yaml:"taskfolder,omitempty"`
+		
+		FileServer: struct {
+			Hosts  string `yaml:"hosts,omitempty"`
+			Port   int    `yaml:"port,omitempty"`
 		}{
-			ClientPath: "D:\\code\\JobScheduleClient\\bin",
-			TempZipFolder: "TempFile",
-			TaskFolder: "Data",
+			Hosts:  "127.0.0.1",
+			Port: 8988,
 		},
 	}
 }
@@ -134,13 +132,12 @@ func GetCronArg() *jobs.CronArg {
 	return nil
 }
 
-//client程序的配制
-func GetExeConfig() * ctrl.ExeConfig {
+//获取文件服务器相关的信息
+func GetFileServerInfo() *model.FileServerInfo {
 	if configuration != nil {
-		return &ctrl.ExeConfig{
-			ClientPath : configuration.ExeConfig.ClientPath,
-			TempZipFolder:configuration.ExeConfig.TempZipFolder,
-			TaskFolder:configuration.ExeConfig.TaskFolder,
+		return &model.FileServerInfo{
+			Hosts: configuration.FileServer.Hosts,
+			Port : configuration.FileServer.Port,
 		}
 	}
 	return nil

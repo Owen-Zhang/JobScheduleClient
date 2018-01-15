@@ -97,26 +97,20 @@ func (this *TaskController) UploadRunFile() {
 
 	if err != nil {
 		uploadResult.Msg = "请选择要上传的文件"
-		this.Data["json"] = uploadResult
-		this.ServeJSON()
-		return
+		this.jsonResult(uploadResult)
 
 	} else {
 		fileTool := &libs.FileTool{Url: h.Filename}
 		exts := []string{"zip"}
 		if !fileTool.CheckFileExt(exts) {
 			uploadResult.Msg = "请上传正确的文件类型"
-			this.Data["json"] = uploadResult
-			this.ServeJSON()
-			return
+			this.jsonResult(uploadResult)
 		}
 
 		uuidFileName := fileTool.CreateUuidFile()
 		if uuidFileName == "" {
 			uploadResult.Msg = "文件保存出错，请重新选择文件"
-			this.Data["json"] = uploadResult
-			this.ServeJSON()
-			return
+			this.jsonResult(uploadResult)
 		}
 
 		filePath := tempFileFolder + "/" + uuidFileName
@@ -124,9 +118,7 @@ func (this *TaskController) UploadRunFile() {
 
 		if err := this.SaveToFile("files[]", filePath); err != nil {
 			uploadResult.Msg = err.Error()
-			this.Data["json"] = uploadResult
-			this.ServeJSON()
-			return
+			this.jsonResult(uploadResult)
 		}
 
 		uploadResult.IsSuccess = true
@@ -202,7 +194,10 @@ func (this *TaskController) SaveTask() {
 	task.Notify, _ = this.GetInt("notify")
 	task.TimeOut, _ = this.GetInt("timeout")
 	task.WorkerId,_ =  this.GetInt("worker_id")
-	task.TaskApiMethod = strings.TrimSpace(this.GetString("task_method"))
+	task.TaskApiMethod = ""
+	if task.TaskType == 2 {
+		task.TaskApiMethod = strings.TrimSpace(this.GetString("task_method"))
+	}
 	task.TaskApiUrl = strings.TrimSpace(this.GetString("task_url"))
 	useruploadfile := strings.TrimSpace(this.GetString("oldzipfile"))
 	
@@ -413,22 +408,19 @@ func (this *TaskController) Start() {
 	
 	if id <= 0 {
 		result.Msg = "请操作正常的任务"
-		this.Data["json"] = result
-		this.ServeJSON()
+		this.jsonResult(result)
 	}
 
 	task, err := dataaccess.GetTaskById(id)
 	if err != nil {
 		result.Msg = err.Error()
-		this.Data["json"] = result
-		this.ServeJSON()
+		this.jsonResult(result)
 	}
 	if task != nil {
 		worker, err := dataaccess.GetOneWorker("", task.WorkerId)
 		if err != nil {
 			result.Msg = err.Error()
-			this.Data["json"] = result
-			this.ServeJSON()
+			this.jsonResult(result)
 		}
 		
 		if worker != nil {
@@ -438,8 +430,7 @@ func (this *TaskController) Start() {
 			updateerr := dataaccess.TaskUpdateStatus(id, 1)
 			if updateerr != nil {
 				result.Msg = updateerr.Error()
-				this.Data["json"] = result
-				this.ServeJSON()
+				this.jsonResult(result)
 			}
 			
 			res, err :=
@@ -454,13 +445,12 @@ func (this *TaskController) Start() {
 				//将状态改回去
 				dataaccess.TaskUpdateStatus(id, 0)
 
-				this.Data["json"] = result
-				this.ServeJSON()
+				this.jsonResult(result)
 			}
 		}
 	}
 
-	this.Data["json"] = &response.ResultData{
+	this.jsonResult(&response.ResultData{
 		IsSuccess: true,
 		Msg:       "",
 		Data: &response.JobInfo{
@@ -468,8 +458,7 @@ func (this *TaskController) Start() {
 			Prev:   "-",
 			Next:   "-",
 		},
-	}
-	this.ServeJSON()
+	})
 }
 
 // 直接运行任务
@@ -482,30 +471,26 @@ func (this *TaskController) Run()  {
 	id, _ := this.GetInt("id")
 	if id <= 0 {
 		result.Msg = "请操作正常的任务"
-		this.Data["json"] = result
-		this.ServeJSON()
+		this.jsonResult(result)
 	}
 
 	task, err := dataaccess.GetTaskById(id)
 	if err != nil {
 		result.Msg = err.Error()
-		this.Data["json"] = result
-		this.ServeJSON()
+		this.jsonResult(result)
 	}
 
 	//这里可以分成两个动作，先start再run，后台统一去作处理
 	if task.Status != 1 {
 		result.Msg = "请先开始任务再运行"
-		this.Data["json"] = result
-		this.ServeJSON()
+		this.jsonResult(result)
 	}
 
 	if task != nil {
 		worker, err := dataaccess.GetOneWorker("", task.WorkerId)
 		if err != nil {
 			result.Msg = err.Error()
-			this.Data["json"] = result
-			this.ServeJSON()
+			this.jsonResult(result)
 		}
 
 		if worker != nil {
@@ -518,13 +503,12 @@ func (this *TaskController) Run()  {
 				if err == nil {
 					result.Msg = "[Stop]通知客戶端失敗"
 				}
-				this.Data["json"] = result
-				this.ServeJSON()
+				this.jsonResult(result)
 			}
 		}
 	}
-
-	this.Data["json"] = &response.ResultData{
+	
+	this.jsonResult(&response.ResultData{
 		IsSuccess: true,
 		Msg:       "",
 		Data: &response.JobInfo{
@@ -532,8 +516,7 @@ func (this *TaskController) Run()  {
 			Prev:   "-",
 			Next:   "-",
 		},
-	}
-	this.ServeJSON()
+	})
 }
 
 // 暂停任务
@@ -546,23 +529,20 @@ func (this *TaskController) Pause() {
 	id, _ := this.GetInt("id")
 	if id <= 0 {
 		result.Msg = "请操作正常的任务"
-		this.Data["json"] = result
-		this.ServeJSON()
+		this.jsonResult(result)
 	}
 	
 	task, err := dataaccess.GetTaskById(id)
 	if err != nil {
 		result.Msg = err.Error()
-		this.Data["json"] = result
-		this.ServeJSON()
+		this.jsonResult(result)
 	}
 	
 	if task != nil {
 		worker, err := dataaccess.GetOneWorker("", task.WorkerId)
 		if err != nil {
 			result.Msg = err.Error()
-			this.Data["json"] = result
-			this.ServeJSON()
+			this.jsonResult(result)
 		}
 		
 		if worker != nil {
@@ -577,19 +557,17 @@ func (this *TaskController) Pause() {
 				if err == nil {
 					result.Msg = "[Stop]通知客戶端失敗"
 				}
-				this.Data["json"] = result
-				this.ServeJSON()
+				this.jsonResult(result)
 			}
 			
 			if err := dataaccess.TaskUpdateStatus(id, 0); err != nil {
 				result.Msg = err.Error()
-				this.Data["json"] = result
-				this.ServeJSON()
+				this.jsonResult(result)
 			}
 		}
 	}
 	
-	this.Data["json"] = &response.ResultData{
+	this.jsonResult(&response.ResultData{
 		IsSuccess: true,
 		Msg:       "",
 		Data: &response.JobInfo{
@@ -597,8 +575,7 @@ func (this *TaskController) Pause() {
 			Prev:   "-",
 			Next:   "-",
 		},
-	}
-	this.ServeJSON()
+	})
 }
 
 // 删除任务
@@ -611,15 +588,13 @@ func (this *TaskController) Delete() {
 	id, _ := this.GetInt("id")
 	if id <= 0 {
 		result.Msg = "请操作正常的任务"
-		this.Data["json"] = result
-		this.ServeJSON()
+		this.jsonResult(result)
 	}
 
 	task, err := dataaccess.GetTaskById(id)
 	if err != nil {
 		result.Msg = err.Error()
-		this.Data["json"] = result
-		this.ServeJSON()
+		this.jsonResult(result)
 	}
 	
 	if task != nil {
@@ -627,8 +602,7 @@ func (this *TaskController) Delete() {
 		worker, err := dataaccess.GetOneWorker("", task.WorkerId)
 		if err != nil {
 			result.Msg = err.Error()
-			this.Data["json"] = result
-			this.ServeJSON()
+			this.jsonResult(result)
 		}
 		if worker != nil {
 			posturl := fmt.Sprintf(workerUrl, worker.Url, worker.Port, "deletetask")
@@ -642,19 +616,16 @@ func (this *TaskController) Delete() {
 				if err == nil {
 					result.Msg = "[Delete]通知客戶端失敗"
 				}
-				this.Data["json"] = result
-				this.ServeJSON()
+				this.jsonResult(result)
 			}
 			
 			if err := dataaccess.TaskDel(id); err != nil {
 				result.Msg = err.Error()
-				this.Data["json"] = result
-				this.ServeJSON()
+				this.jsonResult(result)
 			}
 		}	
 	}
 		
 	result.IsSuccess = true
-	this.Data["json"] = result
-	this.ServeJSON()
+	this.jsonResult(result)
 }

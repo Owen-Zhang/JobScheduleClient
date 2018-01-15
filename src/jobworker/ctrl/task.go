@@ -51,10 +51,12 @@ func (this *Controller) start(request *Action) {
 			//反序列化有错就表示要重新下载文件及更新相应的配制信息
 			if errconfig != nil {
 				if err := this.updateConfig(task); err != nil {
+					fmt.Printf("updateConfig err: %s", err.Error())
 					return
 				}
 				
 				if err := this.updateFileInfo(task); err != nil {
+					fmt.Printf("updateFileInfo err: %s", err.Error())
 					return
 				}
 			}
@@ -63,10 +65,12 @@ func (this *Controller) start(request *Action) {
 			zipFileName := path.Base(task.ZipFilePath)
 			if config.Version < task.Version && config.FileName != zipFileName {
 				if err := this.updateConfig(task); err != nil {
+					fmt.Printf("updateConfig err: %s", err.Error())
 					return
 				}
 				
 				if err := this.updateFileInfo(task); err != nil {
+					fmt.Printf("updateFileInfo err: %s", err.Error())
 					return
 				}
 			}
@@ -74,10 +78,12 @@ func (this *Controller) start(request *Action) {
 		} else {
 			//新建文件夹，下载文件，新增配制信息
 			if err := this.updateConfig(task); err != nil {
+				fmt.Printf("updateConfig err: %s", err.Error())
 					return
 				}
 				
 				if err := this.updateFileInfo(task); err != nil {
+					fmt.Printf("updateFileInfo err: %s", err.Error())
 					return
 				}
 		}
@@ -169,8 +175,9 @@ func (this *Controller) updateFileInfo(task *model.TaskExend) error {
 		}
 	}
 	
-	//下载文件 此处要加文件服务器地址
-	res, errget := http.Get(task.ZipFilePath)
+	//下载文件
+	fileserveraddrss := fmt.Sprintf("http://%s:/%s", this.FileServer.Hosts, this.FileServer.Port, task.ZipFilePath)
+	res, errget := http.Get(fileserveraddrss)
 	if errget != nil {
 		fmt.Printf("DownLoad File err: %s\n",errget.Error())
 		return errget

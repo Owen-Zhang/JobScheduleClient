@@ -402,6 +402,15 @@ $(function () {
 			$(".upload-div").hide()
 		}
 	})
+	
+	$("#task_method").change(function(){
+		var val = $(this).val()
+		if (val == "GET") {
+			$(".command-div").hide();
+		} else {
+			$(".command-div").show();
+		}
+	})
 });
 
 /*
