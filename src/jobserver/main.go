@@ -34,7 +34,7 @@ func main()  {
 	defer dataaccess.Close()
 
 	//1: 加载要执行的任务数据(多久去check worker的状态)
-	healthy.InitHealthCheck("0 */1 * * * ?", dataaccess)
+	healthy.InitHealthCheck("0 0/1 * * * ?", dataaccess)
 
 	// 设置默认404页面
 	beego.ErrorHandler("404", func(rw http.ResponseWriter, r *http.Request) {
@@ -57,5 +57,4 @@ func main()  {
 
 	beego.BConfig.WebConfig.Session.SessionOn = true
 	beego.Run()
-
 }

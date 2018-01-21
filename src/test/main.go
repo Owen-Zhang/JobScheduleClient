@@ -16,6 +16,9 @@ import (
 	"utils/log"
 	"utils/system"
 	"path"
+	"os/exec"
+	"github.com/axgle/mahonia"
+	"strings"
 )
 
 func main()  {
@@ -26,7 +29,11 @@ func main()  {
 		}
 	}()
 
-	testFile()
+	testcmdFile()
+
+	//testunzipFile()
+
+	//testFile()
 
 	//testCreateFolder()
 
@@ -57,6 +64,47 @@ func main()  {
 	for ; ;  {
 		
 	}
+}
+
+//相对目录的问题，exec.cmd() 用相对目录不能正常运行
+func getCurrentPath() string {
+	s, err := exec.LookPath(os.Args[0])
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	s = strings.Replace(s, "\\", "/", -1)
+	s = strings.Replace(s, "\\\\", "/", -1)
+	i := strings.LastIndex(s, "/")
+	path := string(s[0 : i+1])
+	return path
+}
+
+func testcmdFile()  {
+
+	fmt.Println(getCurrentPath())
+
+	bufOut := new(bytes.Buffer)
+	bufErr := new(bytes.Buffer)
+
+	//cmd := exec.Command("cmd.exe", "/c", `D:\Code\JobScheduleClient\bin\Data\9d1a4f1e-3878-46ec-8308-eb4571209a9d\Run\Test.exe`)
+	cmd := exec.Command("cmd.exe", "/c", getCurrentPath() + "Data/9d1a4f1e-3878-46ec-8308-eb4571209a9d/Run/Test.exe")
+	cmd.Stdout = bufOut
+	cmd.Stderr = bufErr
+	cmd.Start()
+
+	cmd.Wait()
+
+	encoder := mahonia.NewDecoder("gbk")
+	fmt.Println(encoder.ConvertString(bufOut.String()))
+	fmt.Println(encoder.ConvertString(bufErr.String()))
+}
+
+func testunzipFile()  {
+	err := system.UnzipFile("TempFile/71d34eff-530f-4e19-8024-09f29ce77f14.zip", "test/t")
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println("unzip file")
 }
 
 func testFile()  {

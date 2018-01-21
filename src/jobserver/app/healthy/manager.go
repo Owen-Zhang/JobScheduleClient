@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"model"
 	"net/http"
+	"github.com/astaxie/beego"
 )
 
 type Health struct {
@@ -47,7 +48,12 @@ func (this *Health) Run() {
 	}
 
 	//此worker不可用, 提示相关信息，并将任务分配给其它的worker
-	if this.count >= 3 {
+	pingcount, err := beego.AppConfig.Int("worker.pingcount")
+	if err != nil {
+		fmt.Printf("[获取worker.pingcount配制：%s]", err)
+	}
+
+	if this.count >= pingcount {
 		fmt.Printf("[%s:%d] 任务将要转移到其它worker", this.health.Url, this.health.Port)
 
 		//1: 处理转移任务
@@ -60,7 +66,7 @@ func (this *Health) Run() {
 func runWithTimeOut(url string, port int, timeout time.Duration) bool {
 	client := http.Client{}
 	client.Timeout = timeout
-	respose, err := client.Post(fmt.Sprintf("%s:%d/ping", url, port), "", nil)
+	respose, err := client.Post(fmt.Sprintf("http://%s:%d/worker/ping", url, port), "", nil)
 	if err != nil {
 		return false
 	}

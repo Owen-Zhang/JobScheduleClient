@@ -8,14 +8,14 @@ func (this *ApiServer) InitRoute() {
 	worker.POST("/ping", this.ping)
 
 	//加入任务
-	worker.POST("/starttask/:id", this.starttask)
+	worker.POST("/starttask", this.starttask)
 
 	//停止任务
-	worker.POST("stoptask/:id", this.stoptask)
+	worker.POST("stoptask", this.stoptask)
 
 	//删除任务
-	worker.POST("deletetask/:id", this.deletetask)
+	worker.POST("deletetask", this.deletetask)
 	
 	//運行任務
-	worker.POST("runtask/:id", this.runtask)
+	worker.POST("runtask", this.runtask)
 }

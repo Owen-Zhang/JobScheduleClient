@@ -25,7 +25,7 @@ type TaskController struct {
 }
 
 const tempFileFolder  = "TempFile"
-const workerUrl = "%s:%d/worker/%s"
+const workerUrl = "http://%s:%d/worker/%s"
 
 // 任务列表
 func (this *TaskController) List() {
@@ -437,9 +437,10 @@ func (this *TaskController) Start() {
 			req.Post(posturl, req.Param{"id" : id})
 			
 			if err != nil || res.Response().StatusCode != http.StatusOK {
-				result.Msg = err.Error()
 				if err == nil {
 					result.Msg = "[Start]通知客戶端失敗"
+				} else {
+					result.Msg = err.Error()
 				}
 
 				//将状态改回去

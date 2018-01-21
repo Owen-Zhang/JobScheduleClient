@@ -10,6 +10,7 @@ import (
 	"github.com/satori/go.uuid"
 	"github.com/mholt/archiver"
 
+	"os/exec"
 )
 
 func FileExist(filename string) bool {
@@ -182,10 +183,24 @@ func UnzipFile(filePath, rundatafolder string) error {
 		if err := os.MkdirAll(rundatafolder, 0777); err != nil {
 			return err
 		}
-		if err := archiver.Zip.Open(filePath, rundatafolder); err != nil {
-			return err
-		}
-		return nil
 	}
+
+	if err := archiver.Zip.Open(filePath, rundatafolder); err != nil {
+		return err
+	}
+
 	return nil
+}
+
+//获取目录的根目录如：D:/ddd/
+func GetCurrentPath() string {
+	s, err := exec.LookPath(os.Args[0])
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	s = strings.Replace(s, "\\", "/", -1)
+	s = strings.Replace(s, "\\\\", "/", -1)
+	i := strings.LastIndex(s, "/")
+	path := string(s[0 : i])
+	return path
 }

@@ -128,13 +128,15 @@ $(function() {
             data: {"id" :id},
             success: function (result) {
                 if (result.IsSuccess) {
-                    UI.HideLoading();
                     td.prev().html(result.Data.Next);
                     td.prev().prev().html(result.Data.Prev);
                     td.attr("status", result.Data.Status);
 
                     InitBtn(id);
+				} else {
+                    $(".alert").text(result.Msg).show();
 				}
+                UI.HideLoading();
             }
         });
     });

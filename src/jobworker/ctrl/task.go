@@ -87,7 +87,7 @@ func (this *Controller) start(request *Action) {
 					return
 				}
 		}
-		command = fmt.Sprintf("%s/Run/%s", datapath, task.Command)
+		command = fmt.Sprintf("%s/%s/Run/%s", system.GetCurrentPath(), datapath, task.Command)
 	}
 
 	if jobs.ExistJob(task.Id) {
@@ -176,7 +176,7 @@ func (this *Controller) updateFileInfo(task *model.TaskExend) error {
 	}
 	
 	//下载文件
-	fileserveraddrss := fmt.Sprintf("http://%s:/%s", this.FileServer.Hosts, this.FileServer.Port, task.ZipFilePath)
+	fileserveraddrss := fmt.Sprintf("http://%s:%d/%s", this.FileServer.Hosts, this.FileServer.Port, task.ZipFilePath)
 	res, errget := http.Get(fileserveraddrss)
 	if errget != nil {
 		fmt.Printf("DownLoad File err: %s\n",errget.Error())
@@ -198,8 +198,7 @@ func (this *Controller) updateFileInfo(task *model.TaskExend) error {
 	defer res.Body.Close()
 
 	//解压到指定的文件夹中
-	runfolder := fmt.Sprintf("%s/", runfilefolder)
-	if err := system.UnzipFile(zipfile, runfolder); err != nil {
+	if err := system.UnzipFile(zipfile, runfilefolder); err != nil {
 		fmt.Printf("unzipfile has wrong err: %s", err.Error())
 		return err
 	}
