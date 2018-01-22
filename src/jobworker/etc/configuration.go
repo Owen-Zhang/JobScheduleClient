@@ -33,6 +33,10 @@ type Configuration struct {
 		Port 	int    `yaml:"port,omitempty"`
 	} `yaml:"fileserver,omitempty"`
 	
+	WorkerInfo struct {
+		Identification int `yaml:"identification,omitempty"`
+	} `yaml:"workerinfo,omitempty"`
+	
 }
 
 var configuration *Configuration
@@ -94,6 +98,12 @@ func makeDefault() *Configuration {
 			Hosts:  "127.0.0.1",
 			Port: 8988,
 		},
+		
+		WorkerInfo: struct {
+			Identification int `yaml:"identification,omitempty"`
+		} {
+			Identification: 1,
+		},
 	}
 }
 
@@ -138,6 +148,15 @@ func GetFileServerInfo() *model.FileServerInfo {
 		return &model.FileServerInfo{
 			Hosts: configuration.FileServer.Hosts,
 			Port : configuration.FileServer.Port,
+		}
+	}
+	return nil
+}
+
+func GetWorkerInfo() *model.WorkerInfo {
+	if configuration != nil {
+		return &model.WorkerInfo{
+			Identification :configuration.WorkerInfo.Identification,
 		}
 	}
 	return nil

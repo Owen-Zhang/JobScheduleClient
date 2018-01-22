@@ -93,12 +93,17 @@ func (this *Controller) start(request *Action) {
 	if jobs.ExistJob(task.Id) {
 		jobs.RemoveJob(task.Id)
 	}
-
+	
 	jobs.AddJob(&model.Task{
-		Id:       task.Id,
-		Name:     task.Name,
-		CronSpec: task.CronSpec, //"0 */1 * * * ?",
-		Command:  command,
+		Id				: task.Id,
+		Name			: task.Name,
+		CronSpec		: task.CronSpec,
+		Command			: command,
+		TaskType		: task.TaskType,
+		TaskApiMethod 	: task.TaskApiMethod,
+		TaskApiUrl 		: task.TaskApiUrl,
+		Concurrent 		: task.Concurrent,
+		TimeOut 		: task.TimeOut,
 	})
 }
 
@@ -206,4 +211,19 @@ func (this *Controller) updateFileInfo(task *model.TaskExend) error {
 	defer os.Remove(zipfile)
 	
 	return nil
+}
+
+//加载本地的任务到任务队列中
+func (this *Controller) AddAutoRunSelfTask(identification int) {
+	list,_ := this.Storage.TaskGetList(1, 100, 1, 0, identification)
+	if list == nil {
+		return
+	}
+	
+	for _, val := range list {
+		this.Actionlist <- Action {
+			ActionType : 2,
+			Id         : val.Id,
+		}
+	}
 }

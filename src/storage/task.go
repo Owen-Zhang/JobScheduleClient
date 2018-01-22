@@ -101,8 +101,8 @@ func (this *DataStorage) TaskAdd(task *model.TaskExend) (error) {
 	return nil
 }
 
-//status -1为全部，其它为数据库正常状态; groupid: 0表示全部，其它表示正常分组下的
-func (this *DataStorage) TaskGetList(page, pageSize, status, groupid int) ([]*model.TaskExend, int) {
+//status -1为全部，其它为数据库正常状态; groupid: 0表示全部，其它表示正常分组下的, workerid:0表示全部，其它表示当个机器编号
+func (this *DataStorage) TaskGetList(page, pageSize, status, groupid, workerid int) ([]*model.TaskExend, int) {
 
 	total := this.taskGetListCount(status, groupid)
 	if total <= 0 {
@@ -115,11 +115,12 @@ func (this *DataStorage) TaskGetList(page, pageSize, status, groupid int) ([]*mo
 			old_zip_file, concurrent, command, status, notify, notify_email, timeout, execute_times,
 			prev_time, create_time, version, zip_file_path
 		from task
-		where (? = -1 or ? = status) AND
+		where (? =-1 or ? = status) AND
 			  (? = 0 or ? = group_id) AND
+			  (? = 0 or ? = worker_id) AND
               deleted = 0
 		order by id ASC
-		LIMIT ?, ?;`, status, status, groupid, groupid, (page - 1)*pageSize, pageSize)
+		LIMIT ?, ?;`, status, status, groupid, groupid, workerid, workerid, (page - 1)*pageSize, pageSize)
 
 	if err != nil {
 		fmt.Printf("TaskGetList has wrong: %s\n", err)

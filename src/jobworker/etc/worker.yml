@@ -11,4 +11,6 @@ cron:
 fileserver:
     hosts: 127.0.0.1
     port: 8988
+workerinfo:
+	identification: 1
 ...

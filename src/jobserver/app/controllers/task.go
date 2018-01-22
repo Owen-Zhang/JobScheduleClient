@@ -36,7 +36,7 @@ func (this *TaskController) List() {
 	groupId, _ := this.GetInt("groupid")
 	workerid, _ := this.GetInt("workerid")
 	
-	result, count := dataaccess.TaskGetList(page, this.pageSize, -1, groupId)
+	result, count := dataaccess.TaskGetList(page, this.pageSize, -1, groupId, workerid)
 
 	list := make([]map[string]interface{}, len(result))
 	for k, v := range result {

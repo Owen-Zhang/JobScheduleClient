@@ -35,6 +35,12 @@ func NewWorker() (*JobWork, error) {
 	if fileserverinfo == nil {
 		return nil, errors.New("get FileServerInfo is wrong")
 	}
+	
+	workerinfo := etc.GetWorkerInfo()
+	if workerinfo == nil {
+		return nil, errors.New("GetWorkerInfo is wrong")
+	}
+	
 	controller := ctrl.NewController(dataaccess, fileserverinfo)
 	apiserver := api.NewAPiServer(etc.GetApiServerArg(), controller)
 	jobs.NewCron(etc.GetCronArg(), dataaccess)
@@ -44,6 +50,10 @@ func NewWorker() (*JobWork, error) {
 		Storage:    dataaccess,
 		Api:        apiserver,
 	}
+	
+	//加载本地的任务到任务队列中
+	job.Controller.AddAutoRunSelfTask(workerinfo.Identification)
+	
 	return job, nil
 }
 
