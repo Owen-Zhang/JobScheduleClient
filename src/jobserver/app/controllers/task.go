@@ -35,9 +35,12 @@ func (this *TaskController) List() {
 	}
 	groupId, _ := this.GetInt("groupid")
 	workerid, _ := this.GetInt("workerid")
+
+	// 分组列表
+	groups, _ := dataaccess.TaskGroupGetList(1, 100)
+	workersTemp, _:= dataaccess.GetWorkerList(2)
 	
 	result, count := dataaccess.TaskGetList(page, this.pageSize, -1, groupId, workerid)
-
 	list := make([]map[string]interface{}, len(result))
 	for k, v := range result {
 		row := make(map[string]interface{})
@@ -47,39 +50,25 @@ func (this *TaskController) List() {
 		row["status"] = v.Status
 		row["description"] = v.Description
 		row["tasktype"] = v.TaskType
-		row["groupname"] = "分组"
-		row["workname"] = "worker name"
-		//row["next_time"] = "-"
-		//row["prev_time"] = "-"
-
-		/*
-
-		if e != nil {
-			row["next_time"] = beego.Date(e.Next, "Y-m-d H:i:s")
-			row["prev_time"] = "-"
-			if e.Prev.Unix() > 0 {
-				row["prev_time"] = beego.Date(e.Prev, "Y-m-d H:i:s")
-			} else if v.PrevTime > 0 {
-				row["prev_time"] = beego.Date(time.Unix(v.PrevTime, 0), "Y-m-d H:i:s")
+		row["groupname"] = ""
+		row["workname"] = ""
+		
+		for _,val := range groups {
+			if val.Id == v.GroupId {
+				row["groupname"] = val.GroupName
 			}
-			row["running"] = 1
-		} else {
-			row["next_time"] = "-"
-			if v.PrevTime > 0 {
-				row["prev_time"] = beego.Date(time.Unix(v.PrevTime, 0), "Y-m-d H:i:s")
-			} else {
-				row["prev_time"] = "-"
+		}	
+		for _,val := range workersTemp {
+			if val.Id == v.WorkerId {
+				row["workname"] = val.Name
 			}
-			row["running"] = 0
 		}
-		*/
+			
 		list[k] = row
 	}
 
-	// 分组列表
-	groups, _ := dataaccess.TaskGroupGetList(1, 100)
 	workers, _:= dataaccess.GetWorkerList(1)
-
+	
 	this.Data["pageTitle"] = "任务列表"
 	this.Data["list"] = list
 	this.Data["groups"] = groups

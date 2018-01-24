@@ -111,7 +111,7 @@ func (this *DataStorage) TaskGetList(page, pageSize, status, groupid, workerid i
 
 	rows, err := this.db.Query(
 		`SELECT
-			id, user_id, group_id, task_name, task_type, description, cron_spec, run_file_folder,
+			id, user_id, group_id, worker_id, task_name, task_type, description, cron_spec, run_file_folder,
 			old_zip_file, concurrent, command, status, notify, notify_email, timeout, execute_times,
 			prev_time, create_time, version, zip_file_path
 		from task
@@ -132,10 +132,10 @@ func (this *DataStorage) TaskGetList(page, pageSize, status, groupid, workerid i
 	for rows.Next() {
 
 		var task_name,description, cron_spec, run_file_folder, old_zip_file, command, notify_email, zip_file_path string
-		var id, user_id, group_id,task_type, concurrent, status, notify, timeout, execute_times, version int
+		var id, user_id, group_id, worker_id, task_type, concurrent, status, notify, timeout, execute_times, version int
 		var create_time, prev_time int64
 
-		if er := rows.Scan(&id, &user_id, &group_id, &task_name, &task_type, &description, &cron_spec, &run_file_folder,
+		if er := rows.Scan(&id, &user_id, &group_id, &worker_id, &task_name, &task_type, &description, &cron_spec, &run_file_folder,
 			&old_zip_file, &concurrent, &command, &status, &notify, &notify_email, &timeout, &execute_times,
 			&prev_time, &create_time, &version, &zip_file_path); er != nil {
 
@@ -157,6 +157,7 @@ func (this *DataStorage) TaskGetList(page, pageSize, status, groupid, workerid i
 				TimeOut		 : timeout,
 				Version		 : version,
 				ZipFilePath	 : zip_file_path,
+				WorkerId     : worker_id,
 			},
 			UserId		: user_id,
 			GroupId		: group_id,
