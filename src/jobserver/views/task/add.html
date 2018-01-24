@@ -309,6 +309,11 @@ $(function () {
 		notifyName = 'OverNotify';		
 	$("input:radio[name='" + notifyName + "']").attr("checked",'checked');
 	
+	var isview = {{.status}};
+	if (isview == "view") {
+		$("#btn-save").hide();
+	}
+	
     //初始化上传组件信息
     $("#uploadFile").fileupload({
         done: function (e, result) {

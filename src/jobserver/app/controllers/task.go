@@ -46,8 +46,11 @@ func (this *TaskController) List() {
 		row["cron_spec"] = v.CronSpec
 		row["status"] = v.Status
 		row["description"] = v.Description
-		row["next_time"] = "-"
-		row["prev_time"] = "-"
+		row["tasktype"] = v.TaskType
+		row["groupname"] = "分组"
+		row["workname"] = "worker name"
+		//row["next_time"] = "-"
+		//row["prev_time"] = "-"
 
 		/*
 
@@ -158,6 +161,9 @@ func (this *TaskController) Edit() {
 	this.Data["workers"] = workers
 	this.Data["task"] = task
 	this.Data["pageTitle"] = "编辑任务"
+	
+	status := this.GetString("status", "")
+	this.Data["status"] = status
 
 	this.display("task/add")
 }
