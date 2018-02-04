@@ -17,6 +17,7 @@ type Task struct {
 	Command     	string        //任务的命令如Init.exe xxx
 	TaskApiUrl      string        //API地址，如有端口号需要加上端口
 	TaskApiMethod   string        //提交方式(POST, GET)
+	ApiHeader       string        //提交的header
 	TimeOut     	int           //任务执行的超时时间
 	Concurrent  	int   		  //是否允许在再一次没有运行完成的情况运行下一次
 	Notify      	int           //是否需要通知

@@ -194,6 +194,7 @@ func (this *TaskController) SaveTask() {
 		task.TaskApiMethod = strings.TrimSpace(this.GetString("task_method"))
 	}
 	task.TaskApiUrl = strings.TrimSpace(this.GetString("task_url"))
+	task.ApiHeader = strings.TrimSpace(this.GetString("api_header"))
 	useruploadfile := strings.TrimSpace(this.GetString("oldzipfile"))
 	
 	isUploadNewFile := false

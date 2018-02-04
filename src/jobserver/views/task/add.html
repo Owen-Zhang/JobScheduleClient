@@ -189,6 +189,14 @@
 						<i class="icon-question-sign notegreen" title="如：http://127.0.0.1:2000/abs"></i>
 					</div>				
 				</div>
+
+                <div class="control-group">
+                    <label class="control-label" for="api_header">头信息(header)</label>
+                    <i class="icon-question-sign notegreen" title="请保持这样的格式:&#13;Content-Type=application/json&#13;456=sdfadsf"></i>
+                    <div class="controls">
+                        <textarea class="span6" id="api_header" rows="6">{{.task.ApiHeader}}</textarea>
+                    </div>
+                </div>
 				
 				<div class="control-group task_url_method_div">
                     <label class="control-label" for="task_method">提交方式</label>
@@ -364,7 +372,8 @@ $(function () {
                 "runfilename": $("#uploadFile").attr("data-file") == undefined ? "" : $("#uploadFile").attr("data-file"),
 				"oldzipfile": $.trim($(".filestate").text()),
 				"task_url":$.trim($("#task_url").val()),
-				"task_method": $("#task_method").val()
+				"task_method": $("#task_method").val(),
+				"api_header": $("#api_header").val()
 			},
             success: function (result) {
                 if (result.IsSuccess) {
