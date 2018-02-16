@@ -4,6 +4,7 @@ CREATE TABLE `worker` (
   `url`         varchar(100)     NOT NULL DEFAULT '' COMMENT '地址',
   `port`        int(11)          NOT NULL DEFAULT '0'COMMENT '端口',
   `systeminfo`  varchar(50)      NOT NULL DEFAULT '' COMMENT '系统信息(windows, linux,...)',
+  `note`        varchar(500)     NOT NULL DEFAULT '' COMMENT '说明',
   `status`      int(11)          NOT NULL DEFAULT '0'COMMENT 'worker的状态',
 
   PRIMARY KEY (`id`)

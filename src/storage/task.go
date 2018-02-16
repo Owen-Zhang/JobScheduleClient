@@ -197,3 +197,9 @@ func (this *DataStorage) TaskDel(id int) error {
 	_, err := this.db.Exec("update task set deleted = 1 where id = ?;", id)
 	return err
 }
+
+//调整机器
+func (this *DataStorage) UpdateTaskWorker(oldworkerid, newworkerid int) error {
+	_, err := this.db.Exec("update task set worker_id = ? where worker_id=?;",  newworkerid, oldworkerid)
+	return err
+}

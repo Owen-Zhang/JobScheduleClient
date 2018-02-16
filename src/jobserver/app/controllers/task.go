@@ -25,7 +25,7 @@ type TaskController struct {
 }
 
 const tempFileFolder  = "TempFile"
-const workerUrl = "http://%s:%d/worker/%s"
+//const workerUrl = "http://%s:%d/worker/%s"
 
 // 任务列表
 func (this *TaskController) List() {
@@ -38,7 +38,7 @@ func (this *TaskController) List() {
 
 	// 分组列表
 	groups, _ := dataaccess.TaskGroupGetList(1, 100)
-	workersTemp, _:= dataaccess.GetWorkerList(2)
+	workersTemp, _:= dataaccess.GetWorkerList(2, "")
 	
 	result, count := dataaccess.TaskGetList(page, this.pageSize, -1, groupId, workerid)
 	list := make([]map[string]interface{}, len(result))
@@ -67,7 +67,7 @@ func (this *TaskController) List() {
 		list[k] = row
 	}
 
-	workers, _:= dataaccess.GetWorkerList(1)
+	workers, _:= dataaccess.GetWorkerList(1, "")
 	
 	this.Data["pageTitle"] = "任务列表"
 	this.Data["list"] = list
@@ -125,7 +125,7 @@ func (this *TaskController) UploadRunFile() {
 // 添加任务
 func (this *TaskController) Add() {
 	groups, _ := dataaccess.TaskGroupGetList(1, 100)
-	workers,_ := dataaccess.GetWorkerList(1)
+	workers,_ := dataaccess.GetWorkerList(1, "")
 
 	this.Data["groups"] = groups
 	this.Data["workers"] = workers
@@ -144,7 +144,7 @@ func (this *TaskController) Edit() {
 
 	// 分组列表
 	groups, _ := dataaccess.TaskGroupGetList(1, 100)
-	workers,_ := dataaccess.GetWorkerList(1)
+	workers,_ := dataaccess.GetWorkerList(1, "")
 
 	this.Data["groups"] = groups
 	this.Data["workers"] = workers
@@ -419,7 +419,7 @@ func (this *TaskController) Start() {
 		}
 		
 		if worker != nil {
-			posturl := fmt.Sprintf(workerUrl, worker.Url, worker.Port, "starttask")
+			posturl := fmt.Sprintf(model.WorkerUrl, worker.Url, worker.Port, "starttask")
 			fmt.Println(posturl)
 
 			updateerr := dataaccess.TaskUpdateStatus(id, 1)
@@ -490,7 +490,7 @@ func (this *TaskController) Run()  {
 		}
 
 		if worker != nil {
-			posturl := fmt.Sprintf(workerUrl, worker.Url, worker.Port, "stoptask")
+			posturl := fmt.Sprintf(model.WorkerUrl, worker.Url, worker.Port, "stoptask")
 			fmt.Println(posturl)
 
 			res, err := req.Post(posturl, req.Param{"id": id})
@@ -542,7 +542,7 @@ func (this *TaskController) Pause() {
 		}
 		
 		if worker != nil {
-			posturl := fmt.Sprintf(workerUrl, worker.Url, worker.Port, "stoptask")
+			posturl := fmt.Sprintf(model.WorkerUrl, worker.Url, worker.Port, "stoptask")
 			fmt.Println(posturl)
 			
 			res, err :=
@@ -601,7 +601,7 @@ func (this *TaskController) Delete() {
 			this.jsonResult(result)
 		}
 		if worker != nil {
-			posturl := fmt.Sprintf(workerUrl, worker.Url, worker.Port, "deletetask")
+			posturl := fmt.Sprintf(model.WorkerUrl, worker.Url, worker.Port, "deletetask")
 			fmt.Println(posturl)
 			
 			res, err :=

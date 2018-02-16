@@ -22,6 +22,16 @@
 </div>
 
 <div class="control-group">
+	<label class="control-label" for="systeminfo">系统</label>
+	<div class="controls">
+	    <select id="systeminfo">
+	        <option value="windows">windows</option>
+			<option value="linux">linux</option>
+	    </select>
+	</div>
+</div>
+
+<div class="control-group">
     <label class="control-label" for="worker_url">IP地址</label>
     <div class="controls">
         <input type="text" name="worker_url" class="span6" id="worker_url">
@@ -36,9 +46,9 @@
 </div>
 
 <div class="control-group">
-    <label class="control-label" for="worker_systeminfo">系统说明</label>
+    <label class="control-label" for="worker_note">说明</label>
     <div class="controls">
-        <textarea name="worker_systeminfo" class="span6" id="worker_systeminfo" rows="6"></textarea>
+        <textarea name="worker_note" class="span6" id="worker_note" rows="6"></textarea>
     </div>
 </div>
 
@@ -70,9 +80,10 @@ $(function () {
             async: true,
             data: {
                 "worker_name": $("#worker_name").val(),
-                "worker_systeminfo": $("#worker_systeminfo").val(),
+                "worker_systeminfo": $("#systeminfo").val(),
                 "worker_url": $("#worker_url").val(),
-                "worker_port": $("#worker_port").val()
+                "worker_port": $("#worker_port").val(),
+				"worker_note": $("#note").val()
             },
             success: function (result) {
                 if (result.status == 0) {

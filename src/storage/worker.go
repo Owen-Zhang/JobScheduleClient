@@ -10,8 +10,8 @@ import (
 //新增worker
 func (this *DataStorage) AddWorker(info *model.HealthInfo) error {
 	_, err := this.db.Exec(
-		"INSERT into worker(name, url, port, systeminfo, status) VALUES(?,?,?,?,?)",
-			info.Name, info.Url, info.Port, info.SystemInfo, info.Status)
+		"INSERT into worker(name, url, port, systeminfo, note, status) VALUES(?,?,?,?,?,?)",
+			info.Name, info.Url, info.Port, info.SystemInfo, info.Note, info.Status)
 	return err
 }
 
@@ -58,8 +58,8 @@ func (this *DataStorage) DeleteWorker(id int) error  {
 }
 
 //查询出所有的worker机器(status = 2表示全部), 1表示正常，0表示不可用
-func (this *DataStorage) GetWorkerList(status int) ([]*model.HealthInfo, error) {
-	rows, err := this.db.Query("SELECT id, name, url, port, systeminfo, status from worker where (? = 2 or ? = status);", status, status)
+func (this *DataStorage) GetWorkerList(status int, systeminfo string) ([]*model.HealthInfo, error) {
+	rows, err := this.db.Query("SELECT id, name, url, port, systeminfo, note, status from worker where (? = 2 or ? = status) and (? = '' or ? = systeminfo);", status, status, systeminfo, systeminfo)
 	if err != nil {
 		return nil, err
 	}
@@ -67,18 +67,19 @@ func (this *DataStorage) GetWorkerList(status int) ([]*model.HealthInfo, error) 
 
 	var result []*model.HealthInfo
 	for rows.Next() {
-		var name, url, systeminfo string
+		var name, url, systeminfo, note string
 		var id, port, status int
-		if er := rows.Scan(&id, &name, &url, &port, &systeminfo, &status); er != nil {
+		if er := rows.Scan(&id, &name, &url, &port, &systeminfo, &note, &status); er != nil {
 			fmt.Printf("Query GetWorkerList has wrong : %s", er)
 		}
 		result = append(result, &model.HealthInfo{
-			Id : id,
-			Name: name,
-			Url: url,
-			Port: port,
-			SystemInfo: systeminfo,
-			Status: status,
+			Id 			: id,
+			Name		: name,
+			Url			: url,
+			Port		: port,
+			SystemInfo	: systeminfo,
+			Note		: note,
+			Status		: status,
 		})
 	}
 	return result, nil
